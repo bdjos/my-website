@@ -25,7 +25,7 @@ SECRET_KEY = 'wr5)b$de6@y+h5*rhst+oqa80arc3%7j)8z5k*d1+ze39$r=d8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['bdjprojects.com', 'www.bdjprojects.com', 'localhost', '159.89.125.33']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'webmain',
+    'optimizer',
 ]
 
 MIDDLEWARE = [
@@ -75,13 +77,9 @@ WSGI_APPLICATION = 'mywebsite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myproject',
-    	'User': 'bjos',
-	'PASSWORD': '3iRM7Ihr@',
-	'HOST': 'localhost',
-	'PORT': '',
-	}
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 }
 
 

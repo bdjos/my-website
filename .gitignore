@@ -1,7 +1,9 @@
 *.pyc
 *~
 __pycache__
+myvenv
 myprojectenv
 db.sqlite3
 /static
 .DS_Store
+/mywebsite/settings.py
