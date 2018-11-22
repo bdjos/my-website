@@ -2,4 +2,4 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 def index(request):
-    return HttpResponse('<p> this is my website</p>')
+    return render(request, 'webmain/home.html')

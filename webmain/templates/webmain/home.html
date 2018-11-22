@@ -1,8 +1,40 @@
+
+
 {% extends "webmain/header.html" %}
 
 {% block content %}
 
-<p> This is my website and I'm tired </p>
+<div class="row">
+  <div class="col-sm-1">
+  </div>
+  <div class="col-sm-3">
+    <div class="card" style="width: 18rem; height: 24rem">
+      <img class="card-img-top" src="static/img/newplot.png" alt="IESO Predict">
+        <div class="card-body">
+          <h5 class="card-title">IESO Predict</h5>
+          <p class="card-text">Predicts daily Ontario electricity grid demand</p>
+          <a href="./iesopredict/" class="btn btn-primary">Open App</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card" style="width: 18rem; height: 24rem">
+        <img class="card-img-top" src="static/img/newplot.png" alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">Microgrid Optimizer</h5>
+          <p class="card-text">Model a microgrid system and optimize</p>
+          <a href="./optimizer/" class="btn btn-primary">Open App</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+    </div>
+    <div class="col-sm-1">
+    </div>
+  </div>
+</div>
 
-{% include "webmain/includes/htmlsnippet.html" %}
+
+
+
 {% endblock %}

@@ -6,4 +6,4 @@ myprojectenv
 db.sqlite3
 /static
 .DS_Store
-/mywebsite/settings.py
+settings.py
