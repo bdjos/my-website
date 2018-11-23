@@ -38,6 +38,11 @@ body {
   }
 }
 
+.nav-link:link{
+  color: #fb3f00;
+  text-decoration: none;
+}
+
 .sidebar .nav-link {
   font-weight: 500;
   color: #333;
