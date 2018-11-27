@@ -1,43 +1,41 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import CreateBattery
-from .forms import CreateBatteryForm
+from .models import CreateBattery, AddBattery
+from .forms import CreateBatteryForm, AddBatteryForm
 
-class header_pages():
-    def __init__(self):
-        self.components = CreateBattery.objects.all()
+def index(request):
+    components = AddBattery.objects.all()
+    return render(request, 'optimizer/main.html', {'components': components})
 
-    @classmethod
-    def index(cls, request):
-        cls.__init__(cls)
-        return render(request, 'optimizer/main.html', {'components': cls.components})
+def run_model(request):
+    components = AddBattery.objects.all()
+    return render(request, 'optimizer/main.html', {'components': components})
 
-    @classmethod
-    def run_model(cls, request):
-        cls.__init__(cls)
-        return render(request, 'optimizer/main.html', {'components': cls.components})
+def add_component(request):
+    components = AddBattery.objects.all()
+    return render(request, 'optimizer/add_component.html', {'components': components})
 
-    @classmethod
-    def add_component(cls, request):
-        cls.__init__(cls)
-        return render(request, 'optimizer/add_component.html', {'components': cls.components})
+def add_demand(request):
+    components = AddBattery.objects.all()
+    return render(request, 'optimizer/add_demand.html', {'components': components})
 
-    @classmethod
-    def add_demand(cls, request):
-        cls.__init__(cls)
-        return render(request, 'optimizer/add_demand.html', {'components': cls.components})
+def add_battery(request):
+    components = AddBattery.objects.all()
+    if request.method == "POST":
+        create_form = CreateBatteryForm(request.POST)
+        add_form = AddBatteryForm(request.POST)
+        if create_form.is_valid() and add_form.is_valid():
+            create = create_form.save()
+            add = add_form.save(False)
+            add.createbattery = create
+            add.save()
+            return redirect('add_component')
+    else:
+        create_form = CreateBatteryForm()
+        add_form = AddBatteryForm()
 
-    @classmethod
-    def add_battery(cls, request):
-        cls.__init__(cls)
-        if request.method == "POST":
-            form = CreateBatteryForm(request.POST)
-            if form.is_valid():
-                post = form.save(commit=False)
-#                post.author = request.user
-#                post.published_date = timezone.now()
-                post.save()
-                return redirect('add_component')
-        else:
-            form = CreateBatteryForm()
-        return render(request, 'optimizer/add_battery.html', {'components': cls.components,'form': form})
+    args = {}
+    args['components'] = components
+    args['create_form'] = create_form
+    args['add_form'] = add_form
+    return render(request, 'optimizer/add_battery.html', args)

@@ -6,25 +6,28 @@ from django.conf import settings
 #    sql = f"DROP TABLE {table_name};"
 #    cursor.execute(sql)
 
-class CreateBatteryComponent(models.Model):
-    bat_name = models.CharField(max_length=10)
-    zone = models.IntegerField()
-    
-
-class CreateBatteryDetails(models.Model):
+class CreateBattery(models.Model):
     energy_capacity = models.IntegerField()
     soc_min = models.IntegerField()
     soc_max = models.IntegerField()
     base_cost = models.FloatField()
     energy_cost = models.FloatField()
-    link = models.ForeignKey(CreateBatteryDetails)
 
+    def __str__(self):
+        return str(self.energy_capacity)
 
-    def add_component(self):
-        self.save()
+class AddBattery(models.Model):
+    bat_name = models.CharField(max_length=10)
+    zone = models.IntegerField()
+    createbattery = models.ForeignKey(CreateBattery, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.bat_name
 
-    class Meta:
-        managed = True
+class AddComponent(models.Model):
+    bat_name = models.CharField(max_length=10)
+    zone = models.IntegerField()
+    createbattery = models.ForeignKey(CreateBattery, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.bat_name
