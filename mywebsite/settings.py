@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'webmain',
     'optimizer',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -124,3 +125,4 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+IMPORT_EXPORT_USE_TRANSACTIONS = True

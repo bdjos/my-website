@@ -1,7 +1,14 @@
 {% extends "optimizer/index.html" %}
 
-{% block content %}
+{% load crispy_forms_tags %}
 
-<p>This is my demand content</p>
+{% block content %}
+<h2>New Grid</h2>
+<form method="POST" action={% url "add_grid" %}>
+  {% csrf_token %}
+  {{ create_form|crispy }}
+  {{ add_form|crispy }}
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 
 {% endblock %}

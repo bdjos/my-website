@@ -3,8 +3,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h2>New Solar System</h2>
-<form method="POST" action={% url "add_solar" %}>
+<h2>New Controller</h2>
+<form method="POST" action={% url "add_controller" %}>
   {% csrf_token %}
   {{ create_form|crispy }}
   {{ add_form|crispy }}
