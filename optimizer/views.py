@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import CreateBattery
 from .forms import CreateBatteryForm
@@ -37,7 +37,7 @@ class header_pages():
 #                post.author = request.user
 #                post.published_date = timezone.now()
                 post.save()
-                return redirect('post_detail', pk=post.pk)
+                return redirect('add_component')
         else:
             form = CreateBatteryForm()
         return render(request, 'optimizer/add_battery.html', {'components': cls.components,'form': form})
