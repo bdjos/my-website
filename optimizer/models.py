@@ -9,9 +9,7 @@ from django.conf import settings
 #    cursor.execute(sql)
 
 class CreateDemand(models.Model):
-
-    def __str__(self):
-        return str(self.energy_capacity)
+    demand = models.FloatField()
 
 class CreateBattery(models.Model):
     energy_capacity = models.IntegerField()
@@ -67,7 +65,7 @@ class AddBattery(models.Model):
     bat_name = models.CharField(max_length=10)
     zone = models.IntegerField()
     createbattery = models.ForeignKey(CreateBattery, on_delete=models.CASCADE)
-
+    
     def __str__(self):
         return self.bat_name
 

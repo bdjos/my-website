@@ -2,22 +2,12 @@
 
 {% block content %}
 
-<form action="/your-name/" method="post">
-    <label for="your_name">Your name: </label>
-    <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
-    <input type="submit" value="OK">
-</form>
-
-<form action="/your-name/" method="post">
-    <label for="your_name">Your name: </label>
-    <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
-    <input type="submit" value="OK">
-</form>
-
-<form action="/your-name/" method="post">
-    <label for="your_name">Your name: </label>
-    <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
-    <input type="submit" value="OK">
-</form>
+{% block content %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="myfile">
+    <button type="submit">Upload</button>
+  </form>
+{% endblock %}
 
 {% endblock %}
