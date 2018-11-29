@@ -8,6 +8,14 @@ from django.conf import settings
 #    sql = f"DROP TABLE {table_name};"
 #    cursor.execute(sql)
 
+class AddComponent(models.Model):
+    comp_name = models.CharField(max_length=10, primary_key = True)
+    comp_type = models.CharField(max_length=10)
+    zone = models.IntegerField()
+
+    def __str__(self):
+        return self.comp_name
+
 class CreateDemand(models.Model):
     demand = models.FloatField()
 
@@ -17,46 +25,43 @@ class CreateBattery(models.Model):
     soc_max = models.IntegerField()
     base_cost = models.FloatField()
     energy_cost = models.FloatField()
-
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
-        return str(self.energy_capacity)
+        return str(self.component)
 
 class CreateSolar(models.Model):
     system_capacity = models.IntegerField()
     base_cost = models.FloatField()
     perw_cost = models.FloatField()
-
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
-        return str(self.system_capacity)
+        return str(self.component)
 
 class CreateConverter(models.Model):
-    system_capacity = models.IntegerField()
+    power = models.IntegerField()
     base_cost = models.FloatField()
-    perw_cost = models.FloatField()
-
+    power_cost = models.FloatField()
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
-        return str(self.system_capacity)
+        return str(self.power)
 
 class CreateGenerator(models.Model):
-    system_capacity = models.IntegerField()
+    power = models.IntegerField()
     base_cost = models.FloatField()
-    perw_cost = models.FloatField()
-
+    fuel_cost = models.FloatField()
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
-        return str(self.system_capacity)
+        return str(self.power)
 
 class CreateGrid(models.Model):
-    system_capacity = models.IntegerField()
-    base_cost = models.FloatField()
-    perw_cost = models.FloatField()
-
+    energy_cost = models.FloatField()
+    nm_allowed = models.BooleanField(default=False)
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
-        return str(self.system_capacity)
+        return str(self.energy_cost)
 
 class CreateController(models.Model):
-    system_capacity = models.IntegerField()
-    base_cost = models.FloatField()
-    perw_cost = models.FloatField()
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
 
     def __str__(self):
         return str(self.system_capacity)
@@ -65,17 +70,6 @@ class AddBattery(models.Model):
     bat_name = models.CharField(max_length=10)
     zone = models.IntegerField()
     createbattery = models.ForeignKey(CreateBattery, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return self.bat_name
-
-class AddComponent(models.Model):
-    comp_name = models.CharField(max_length=10)
-    comp_type = models.CharField(max_length=10)
-    zone = models.IntegerField()
-    object_id = models.PositiveIntegerField()
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    createcomponent = GenericForeignKey('content_type', 'object_id')
-
-    def __str__(self):
-        return self.comp_name

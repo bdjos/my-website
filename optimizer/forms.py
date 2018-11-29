@@ -1,8 +1,13 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from .models import CreateBattery, AddBattery, CreateSolar, AddComponent
+from .models import CreateDemand, CreateBattery, CreateSolar, CreateConverter, CreateController, CreateGrid, CreateGenerator, AddComponent
 
+
+class CreateDemandForm(forms.ModelForm):
+    class Meta:
+        model = CreateDemand
+        fields = ('demand',)
 
 class CreateBatteryForm(forms.ModelForm):
     class Meta:
@@ -17,12 +22,12 @@ class CreateSolarForm(forms.ModelForm):
 class CreateConverterForm(forms.ModelForm):
     class Meta:
         model = CreateConverter
-        fields = ('system_capacity', 'base_cost', 'perw_cost')
+        fields = ('power', 'base_cost', 'power_cost')
 
 class CreateGeneratorForm(forms.ModelForm):
     class Meta:
         model = CreateGenerator
-        fields = ('system_capacity', 'base_cost', 'perw_cost')
+        fields = ('power', 'base_cost', 'fuel_cost')
 
 class CreateGridForm(forms.ModelForm):
     class Meta:
@@ -32,9 +37,9 @@ class CreateGridForm(forms.ModelForm):
 class CreateControllerForm(forms.ModelForm):
     class Meta:
         model = CreateController
-        fields = ('system_capacity', 'base_cost', 'perw_cost')
+        fields = ()
 
 class AddComponentForm(forms.ModelForm):
     class Meta:
         model = AddComponent
-        fields = ('comp_name', 'zone')
+        fields = ('comp_name',)

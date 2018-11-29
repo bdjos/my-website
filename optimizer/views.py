@@ -3,11 +3,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
-from .models import CreateSolar, CreateBattery, AddBattery, AddComponent
-from .forms import CreateSolarForm, CreateBatteryForm, AddBatteryForm, AddComponentForm
+from .models import AddComponent
+from .forms import CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm
 
 def index(request):
-    components = AddCom ponent.objects.all()
+    components = AddComponent.objects.all()
     return render(request, 'optimizer/main.html', {'components': components})
 
 def run_model(request):
@@ -18,6 +18,7 @@ def add_component(request):
     components = AddComponent.objects.all()
     return render(request, 'optimizer/add_component.html', {'components': components})
 
+# All add component views
 @permission_required('admin.can_add_log_entry')
 def add_demand(request):
     components = AddComponent.objects.all()
@@ -48,12 +49,15 @@ def add_battery(request):
         create_form = CreateBatteryForm(request.POST)
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
-            create = create_form.save()
             add = add_form.save(False)
             add.comp_type = 'Battery'
-            add.object_id = 1
-            add.createcomponent = create
+            add.zone = 1
             add.save()
+
+            create = create_form.save(False)
+            create.component = add
+            create.save()
+
             return redirect('add_component')
     else:
         create_form = CreateBatteryForm()
@@ -71,12 +75,15 @@ def add_solar(request):
         create_form = CreateSolarForm(request.POST)
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
-            create = create_form.save()
             add = add_form.save(False)
             add.comp_type = 'Solar'
-            add.object_id = 1
-            add.createcomponent = create
+            add.zone = 0
             add.save()
+
+            create = create_form.save(False)
+            create.component = add
+            create.save()
+
             return redirect('add_component')
     else:
         create_form = CreateSolarForm()
@@ -94,12 +101,15 @@ def add_converter(request):
         create_form = CreateConverterForm(request.POST)
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
-            create = create_form.save()
             add = add_form.save(False)
             add.comp_type = 'Converter'
-            add.object_id = 1
-            add.createcomponent = create
+            add.zone = 1
             add.save()
+
+            create = create_form.save(False)
+            create.component = add
+            create.save()
+
             return redirect('add_component')
     else:
         create_form = CreateConverterForm()
@@ -117,12 +127,15 @@ def add_generator(request):
         create_form = CreateGeneratorForm(request.POST)
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
-            create = create_form.save()
             add = add_form.save(False)
             add.comp_type = 'Generator'
-            add.object_id = 1
-            add.createcomponent = create
+            add.zone = 1
             add.save()
+
+            create = create_form.save(False)
+            create.component = add
+            create.save()
+
             return redirect('add_component')
     else:
         create_form = CreateGeneratorForm()
@@ -140,12 +153,15 @@ def add_grid(request):
         create_form = CreateGridForm(request.POST)
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
-            create = create_form.save()
             add = add_form.save(False)
             add.comp_type = 'Grid'
-            add.object_id = 1
-            add.createcomponent = create
+            add.zone = 2
             add.save()
+
+            create = create_form.save(False)
+            create.component = add
+            create.save()
+
             return redirect('add_component')
     else:
         create_form = CreateGridForm()
@@ -163,12 +179,15 @@ def add_controller(request):
         create_form = CreateControllerForm(request.POST)
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
-            create = create_form.save()
             add = add_form.save(False)
             add.comp_type = 'Controller'
-            add.object_id = 1
-            add.createcomponent = create
+            add.zone = 3
             add.save()
+
+            create = create_form.save(False)
+            create.component = add
+            create.save()
+
             return redirect('add_component')
     else:
         create_form = CreateControllerForm()
@@ -179,3 +198,13 @@ def add_controller(request):
     args['create_form'] = create_form
     args['add_form'] = add_form
     return render(request, 'optimizer/add_controller.html', args)
+
+# All view component views
+def view_controller(request):
+    components = AddComponent.objects.all()
+    controller_components = AddComponent.objects.filter(zone=1)
+
+    args = {}
+    args['components'] = components
+    args['controller_components'] = controller_components
+    return render(request, 'optimizer/view_controller.html', args)
