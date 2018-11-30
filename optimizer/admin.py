@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CreateBattery, AddBattery
+from .models import CreateBattery, AddComponent
 
 admin.site.register(CreateBattery)
-admin.site.register(AddBattery)
+admin.site.register(AddComponent)

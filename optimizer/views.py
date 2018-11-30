@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from .models import AddComponent
-from .forms import CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm
+from .forms import CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm, AddToControllerForm
 
 def index(request):
     components = AddComponent.objects.all()
@@ -206,6 +206,7 @@ def add_controller(request):
 # All view component views
 def view_component(request, comp_name):
     components = AddComponent.objects.all()
+    active_components = AddComponent.objects.filter(zone=1) # Find all active components
     input_component = AddComponent.objects.get(comp_name=comp_name)
 
     if request.method =="POST":
@@ -214,4 +215,21 @@ def view_component(request, comp_name):
     args = {}
     args['components'] = components
     args['input_component'] = input_component
+    args['active_components'] = active_components
+    args['comp_name']=comp_name
     return render(request, f'optimizer/view_{input_component.comp_type}.html', args)
+
+def add_to_controller(request, comp_name, add_to_cont_name):
+    components = AddComponent.objects.all()
+    input_component = AddComponent.objects.get(comp_name=add_to_cont_name)
+
+    if request.method == "POST":
+        if input_component.comp_type=='battery':
+            add_form = AddToControllerForm(request.POST)
+        elif input_component.comp_type=='converter':
+            converter = AddToController(component=AddComponent.input_component,
+                                        mode='bidirectional',
+                                        configs='{}')
+            return redirect('view_component', comp_name=comp_name)
+    else:
+        add_form = AddToControllerForm()

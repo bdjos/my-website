@@ -15,6 +15,7 @@ urlpatterns = [
     path('add_component/add_controller/', views.add_controller, name='add_controller'),
     path('add_component/add_grid/', views.add_grid, name='add_grid'),
     path('view_component/<str:comp_name>/', views.view_component, name='view_component'),
+    path('view_component/<str:comp_name>/<str:add_to_cont_name>', views.add_to_controller, name='add_to_controller'),
 #    path('view_component/Battery/', views.view_controller, name='Battery'),
 #    path('view_component/Solar/', views.view_controller, name='Solar'),
 #    path('view_component/Generator/', views.view_controller, name='Generator'),

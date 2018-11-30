@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from .models import CreateDemand, CreateBattery, CreateSolar, CreateConverter, CreateController, CreateGrid, CreateGenerator, AddComponent
+from .models import CreateDemand, CreateBattery, CreateSolar, CreateConverter, CreateController, CreateGrid, CreateGenerator, AddComponent, AddToController
 
 
 class CreateDemandForm(forms.ModelForm):
@@ -43,3 +43,8 @@ class AddComponentForm(forms.ModelForm):
     class Meta:
         model = AddComponent
         fields = ('comp_name',)
+
+class AddToControllerForm(forms.ModelForm):
+    class Meta:
+        model = AddToController
+        fields = ('mode', 'configs')

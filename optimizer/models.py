@@ -17,7 +17,7 @@ class AddComponent(models.Model):
         return self.comp_name
 
 class CreateDemand(models.Model):
-    demand = models.FloatField()
+    demand = models.FloatField() ###### Check out postgres array field for this!!!!!!!!!!! #####
 
 class CreateBattery(models.Model):
     energy_capacity = models.IntegerField()
@@ -65,3 +65,8 @@ class CreateController(models.Model):
 
     def __str__(self):
         return str(self.system_capacity)
+
+class AddToController(models.Model):
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
+    mode = models.CharField(max_length=2, choices=(('ss', 'Solar Support'), ('ab', 'Arbitrage'), ('ps', 'Peak Shaving')))
+    configs = models.CharField(max_length=200)
