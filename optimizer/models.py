@@ -65,11 +65,3 @@ class CreateController(models.Model):
 
     def __str__(self):
         return str(self.system_capacity)
-
-class AddBattery(models.Model):
-    bat_name = models.CharField(max_length=10)
-    zone = models.IntegerField()
-    createbattery = models.ForeignKey(CreateBattery, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.bat_name

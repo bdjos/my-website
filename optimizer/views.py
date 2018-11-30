@@ -18,6 +18,10 @@ def add_component(request):
     components = AddComponent.objects.all()
     return render(request, 'optimizer/add_component.html', {'components': components})
 
+def view_system(request):
+    components = AddComponent.objects.all()
+    return render(request, 'optimizer/view_system.html', {'components': components})
+
 # All add component views
 @permission_required('admin.can_add_log_entry')
 def add_demand(request):
@@ -28,7 +32,7 @@ def add_demand(request):
         if create_form.is_valid() and add_form.is_valid():
             create = create_form.save()
             add = add_form.save(False)
-            add.comp_type = 'Demand'
+            add.comp_type = 'demand'
             add.object_id = 1
             add.createcomponent = create
             add.save()
@@ -50,7 +54,7 @@ def add_battery(request):
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
             add = add_form.save(False)
-            add.comp_type = 'Battery'
+            add.comp_type = 'battery'
             add.zone = 1
             add.save()
 
@@ -76,7 +80,7 @@ def add_solar(request):
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
             add = add_form.save(False)
-            add.comp_type = 'Solar'
+            add.comp_type = 'solar'
             add.zone = 0
             add.save()
 
@@ -102,7 +106,7 @@ def add_converter(request):
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
             add = add_form.save(False)
-            add.comp_type = 'Converter'
+            add.comp_type = 'converter'
             add.zone = 1
             add.save()
 
@@ -128,7 +132,7 @@ def add_generator(request):
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
             add = add_form.save(False)
-            add.comp_type = 'Generator'
+            add.comp_type = 'generator'
             add.zone = 1
             add.save()
 
@@ -154,7 +158,7 @@ def add_grid(request):
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
             add = add_form.save(False)
-            add.comp_type = 'Grid'
+            add.comp_type = 'grid'
             add.zone = 2
             add.save()
 
@@ -180,7 +184,7 @@ def add_controller(request):
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
             add = add_form.save(False)
-            add.comp_type = 'Controller'
+            add.comp_type = 'controller'
             add.zone = 3
             add.save()
 
@@ -200,11 +204,14 @@ def add_controller(request):
     return render(request, 'optimizer/add_controller.html', args)
 
 # All view component views
-def view_controller(request):
+def view_component(request, comp_name):
     components = AddComponent.objects.all()
-    controller_components = AddComponent.objects.filter(zone=1)
+    input_component = AddComponent.objects.get(comp_name=comp_name)
+
+    if request.method =="POST":
+        return redirect('add_component')
 
     args = {}
     args['components'] = components
-    args['controller_components'] = controller_components
-    return render(request, 'optimizer/view_controller.html', args)
+    args['input_component'] = input_component
+    return render(request, f'optimizer/view_{input_component.comp_type}.html', args)

@@ -14,8 +14,8 @@ urlpatterns = [
     path('add_component/add_generator/', views.add_generator, name='add_generator'),
     path('add_component/add_controller/', views.add_controller, name='add_controller'),
     path('add_component/add_grid/', views.add_grid, name='add_grid'),
-    path('view_component/Controller/', views.view_controller, name='Controller'),
-    path('view_component/Battery/', views.view_controller, name='Battery'),
-    path('view_component/Solar/', views.view_controller, name='Solar'),
-    path('view_component/Generator/', views.view_controller, name='Generator'),
+    path('view_component/<str:comp_name>/', views.view_component, name='view_component'),
+#    path('view_component/Battery/', views.view_controller, name='Battery'),
+#    path('view_component/Solar/', views.view_controller, name='Solar'),
+#    path('view_component/Generator/', views.view_controller, name='Generator'),
 ]
