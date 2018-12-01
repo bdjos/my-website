@@ -224,12 +224,23 @@ def add_to_controller(request, comp_name, add_to_cont_name):
     input_component = AddComponent.objects.get(comp_name=add_to_cont_name)
 
     if request.method == "POST":
-        if input_component.comp_type=='battery':
-            add_form = AddToControllerForm(request.POST)
-        elif input_component.comp_type=='converter':
-            converter = AddToController(component=AddComponent.input_component,
-                                        mode='bidirectional',
-                                        configs='{}')
+        # if input_component.comp_type=='battery':
+        add_form = AddToControllerForm(request.POST)
+        if add_form.is_valid():
+            add = add_form.save(False)
+            add.component = input_component
+            add.save()
             return redirect('view_component', comp_name=comp_name)
+        # elif input_component.comp_type=='converter':
+        #     converter = AddToController(component=AddComponent.input_component,
+        #                                 mode='bidirectional',
+        #                                 configs='{}')
+        #     return redirect('view_component', comp_name=comp_name)
     else:
+        ## Here add if statements for different types of components
         add_form = AddToControllerForm()
+
+    args = {}
+    args['components'] = components
+    args['input_component'] = input_component
+    return render(request, 'optimizer/configure_controller.html', args)

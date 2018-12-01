@@ -3,10 +3,9 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h2>New Converter</h2>
-<form method="POST" action={% url "add_converter" %}>
+<h2>Configure Controller for {{ input_component }}</h2>
+<form method="POST" action={% url "add_to_controller" %}>
   {% csrf_token %}
-  {{ create_form|crispy }}
   {{ add_form|crispy }}
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
