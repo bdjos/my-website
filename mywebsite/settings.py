@@ -122,7 +122,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 IMPORT_EXPORT_USE_TRANSACTIONS = True

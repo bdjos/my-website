@@ -23,19 +23,21 @@ def view_system(request):
     return render(request, 'optimizer/view_system.html', {'components': components})
 
 # All add component views
-@permission_required('admin.can_add_log_entry')
 def add_demand(request):
     components = AddComponent.objects.all()
     if request.method == "POST":
-        create_form = CreateDemandForm(request.POST)
+        create_form = CreateDemandForm(request.POST, request.FILES)
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
-            create = create_form.save()
             add = add_form.save(False)
             add.comp_type = 'demand'
-            add.object_id = 1
-            add.createcomponent = create
+            add.zone = 2
             add.save()
+
+            create = create_form.save(False)
+            create.component = add
+            create.save()
+
             return redirect('add_component')
     else:
         create_form = CreateDemandForm()
@@ -219,28 +221,34 @@ def view_component(request, comp_name):
     args['comp_name']=comp_name
     return render(request, f'optimizer/view_{input_component.comp_type}.html', args)
 
-def add_to_controller(request, comp_name, add_to_cont_name):
+def add_to_controller(request, controller, add_to_cont_name):
+
     components = AddComponent.objects.all()
     input_component = AddComponent.objects.get(comp_name=add_to_cont_name)
 
+    #
     if request.method == "POST":
-        # if input_component.comp_type=='battery':
-        add_form = AddToControllerForm(request.POST)
-        if add_form.is_valid():
-            add = add_form.save(False)
-            add.component = input_component
-            add.save()
-            return redirect('view_component', comp_name=comp_name)
-        # elif input_component.comp_type=='converter':
-        #     converter = AddToController(component=AddComponent.input_component,
-        #                                 mode='bidirectional',
-        #                                 configs='{}')
-        #     return redirect('view_component', comp_name=comp_name)
+        if input_component.comp_type=='battery':
+            add_form = AddToControllerForm(request.POST)
+            if add_form.is_valid():
+                add = add_form.save(False)
+                add.component = input_component
+                add.save()
+                return redirect('add_generator')
+
     else:
         ## Here add if statements for different types of components
-        add_form = AddToControllerForm()
-
+        if input_component.comp_type=='battery':
+            add_form = AddToControllerForm()
+        elif input_component.comp_type=='converter':
+            converter = AddToController(component=AddComponent.input_component,
+                                        mode='ss')
+            return redirect('view_component', comp_name=comp_name)
+    #
     args = {}
     args['components'] = components
+    args['controller'] = controller
     args['input_component'] = input_component
+    args['add_form'] = add_form
     return render(request, 'optimizer/configure_controller.html', args)
+    # return render(request, 'optimizer/configure_controller.html', args)

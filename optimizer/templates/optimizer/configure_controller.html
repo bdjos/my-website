@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2>Configure Controller for {{ input_component }}</h2>
-<form method="POST" action={% url "add_to_controller" %}>
+<form method="POST" action={% url "add_to_controller" controller=controller add_to_cont_name=input_component%}>
   {% csrf_token %}
   {{ add_form|crispy }}
   <button type="submit" class="btn btn-primary">Submit</button>

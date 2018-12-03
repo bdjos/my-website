@@ -30,9 +30,10 @@ class CreateGeneratorForm(forms.ModelForm):
         fields = ('power', 'base_cost', 'fuel_cost')
 
 class CreateGridForm(forms.ModelForm):
+    ###### Grid needs to be updated
     class Meta:
-        model = CreateSolar
-        fields = ('system_capacity', 'base_cost', 'perw_cost')
+        model = CreateGrid
+        fields = ('energy_cost', 'nm_allowed')
 
 class CreateControllerForm(forms.ModelForm):
     class Meta:
@@ -47,4 +48,4 @@ class AddComponentForm(forms.ModelForm):
 class AddToControllerForm(forms.ModelForm):
     class Meta:
         model = AddToController
-        fields = ('mode', 'configs')
+        fields = ('mode',)
