@@ -1,0 +1,25 @@
+{% extends "optimizer/index.html" %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-6">
+    <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+      <span>Demand Profile</span>
+    </h4>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-11">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  {{ html|safe }}
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    {% include 'optimizer/includes/deletecomponent.html' %}
+  </div>
+</div>
+
+
+{% endblock %}

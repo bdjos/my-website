@@ -1,9 +1,13 @@
 import csv, io
+import os
+import plotly.plotly as py
+import plotly.graph_objs as go
+import plotly.offline
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
-from .models import AddComponent
+from .models import AddComponent, CreateDemand
 from .forms import CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm, AddToControllerForm
 
 def index(request):
@@ -234,7 +238,7 @@ def add_to_controller(request, controller, add_to_cont_name):
                 add = add_form.save(False)
                 add.component = input_component
                 add.save()
-                return redirect('add_generator')
+                return redirect('view_component', comp_name=comp_name)
 
     else:
         ## Here add if statements for different types of components
@@ -252,3 +256,30 @@ def add_to_controller(request, controller, add_to_cont_name):
     args['add_form'] = add_form
     return render(request, 'optimizer/configure_controller.html', args)
     # return render(request, 'optimizer/configure_controller.html', args)
+
+def view_demand(request, comp_name):
+    components = AddComponent.objects.all()
+    demand_obj = CreateDemand.objects.get(component=AddComponent.objects.get(comp_name=comp_name))
+    path = os.path.join('media', str(demand_obj.demand))
+
+    y =[]
+    with open(path, 'r') as file:
+        reader = csv.reader(file, delimiter=',')
+        for val in reader:
+            y.append(val[0])
+
+    x = list(range(len(y)))
+    figure_or_data = [go.Scatter({'x':x, 'y':y})]
+
+    html = plotly.offline.plot(figure_or_data, include_plotlyjs=False, output_type='div')
+
+    args = {}
+    args['input_component'] = comp_name
+    args['components'] = components
+    args['html'] = html
+    return render(request, 'optimizer/view_demand.html', args)
+
+def delete_component(request, comp_name):
+    AddComponent.objects.filter(comp_name=comp_name).delete()
+
+    return redirect('index')

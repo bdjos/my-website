@@ -3,11 +3,27 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h2>New Solar System</h2>
-<form method="POST" action={% url "add_solar" %}>
-  {% csrf_token %}
-  {{ create_form|crispy }}
-  {{ add_form|crispy }}
-</form>
+<div class="row">
+  <div class="col-md-6">
+    <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" style="padding-bottom:50px">
+      <span >Add a System Component</span>
+    </h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-1">
+  </div>
+  <div class="list-group col-md-5">
+    <a href="{% url 'add_demand' %}" class="list-group-item list-group-item-action">Demand Profile</a>
+    <a href="{% url 'add_battery' %}" class="list-group-item list-group-item-action">Battery</a>
+    <a href="{% url 'add_solar' %}" class="list-group-item list-group-item-action">Solar</a>
+    <a href="{% url 'add_generator' %}" class="list-group-item list-group-item-action">Generator</a>
+    <a href="{% url 'add_converter' %}" class="list-group-item list-group-item-action">Converter</a>
+    <a href="{% url 'add_controller' %}" class="list-group-item list-group-item-action">Controller</a>
+    <a href="{% url 'add_grid' %}" class="list-group-item list-group-item-action">Grid</a>
+  </div>
+  <div class="list-group col-md5">
+</div>
 
 {% endblock %}

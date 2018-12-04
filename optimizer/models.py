@@ -18,8 +18,8 @@ class AddComponent(models.Model):
 
 class CreateDemand(models.Model):
     demand = models.FileField(upload_to='documents/')
-    uploaded_at = models.DateTimeField(auto_now_add=True) ###### Check out postgres array field for this!!!!!!!!!!! #####
-    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    component = models.ForeignKey(AddComponent, on_delete=models.CASCADE, primary_key=True)
 
 class CreateBattery(models.Model):
     energy_capacity = models.IntegerField()
