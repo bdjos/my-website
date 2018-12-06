@@ -1,8 +1,13 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from .models import CreateDemand, CreateBattery, CreateSolar, CreateConverter, CreateController, CreateGrid, CreateGenerator, AddComponent, AddToController
+from .models import CreateSystem, CreateDemand, CreateBattery, CreateSolar, CreateConverter, CreateController, CreateGrid, CreateGenerator, AddComponent, AddToController
 
+
+class CreateSystemForm(forms.ModelForm):
+    class Meta:
+        model = CreateSystem
+        fields = ('system_name',)
 
 class CreateDemandForm(forms.ModelForm):
     class Meta:

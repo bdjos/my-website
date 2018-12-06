@@ -5,8 +5,9 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('add_component/', views.add_component, name='add_component'),
+    #path('', views.index, name='index'),
+    path('', views.create_system, name='create_system'),
+    path('sys_id_<str:sys_id>/add_component/', views.add_component, name='add_component'),
     path('view_system/', views.view_system, name='view_system'),
     path('run_model/', views.run_model, name='run_model'),
     path('add_component/add_demand/', views.add_demand, name='add_demand'),
@@ -20,7 +21,6 @@ urlpatterns = [
     path('view_component/demand/<str:comp_name>/', views.view_demand, name='view_demand'),
     path('config_controller/<str:controller>/<str:add_to_cont_name>', views.add_to_controller, name='add_to_controller'),
     path('delete_component/<str:comp_name>/', views.delete_component, name='delete_component'),
-
 #    path('view_component/Battery/', views.view_controller, name='Battery'),
 #    path('view_component/Solar/', views.view_controller, name='Solar'),
 #    path('view_component/Generator/', views.view_controller, name='Generator'),

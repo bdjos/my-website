@@ -1,5 +1,8 @@
 import csv, io
 import os
+import sys
+sys.path.insert(0, os.path.join('..', 'pv-optimizer'))
+from mgridoptimizer.modules import mgrid_model
 import plotly.plotly as py
 import plotly.graph_objs as go
 import plotly.offline
@@ -8,7 +11,13 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from .models import AddComponent, CreateDemand
-from .forms import CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm, AddToControllerForm
+from .forms import CreateSystemForm, CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm, AddToControllerForm
+
+def common_args(sys_id):
+    components = AddComponent.objects.all()
+    args = {}
+    args['sys_id'] = sys_id
+    args['components'] = components
 
 def index(request):
     components = AddComponent.objects.all()
@@ -18,13 +27,28 @@ def run_model(request):
     components = AddComponent.objects.all()
     return render(request, 'optimizer/main.html', {'components': components})
 
-def add_component(request):
-    components = AddComponent.objects.all()
-    return render(request, 'optimizer/add_component.html', {'components': components})
+def add_component(request, sys_id):
+    args = comon_args(sys_id)
+    return render(request, 'optimizer/add_component.html', args)
 
 def view_system(request):
     components = AddComponent.objects.all()
     return render(request, 'optimizer/view_system.html', {'components': components})
+
+def create_system(request):
+    components = AddComponent.objects.all()
+    if request.method == "POST":
+        create_form = CreateSystemForm(request.POST)
+        if create_form.is_valid():
+            create = create_form.save()
+            return redirect('add_component')
+    else:
+        create_form = CreateSystemForm()
+
+    args = {}
+    args['components'] = components
+    args['create_form'] = create_form
+    return render(request, 'optimizer/create_system.html', args)
 
 # All add component views
 def add_demand(request):
@@ -34,6 +58,7 @@ def add_demand(request):
         add_form = AddComponentForm(request.POST)
         if create_form.is_valid() and add_form.is_valid():
             add = add_form.save(False)
+            add.system_name = CreateSystem.objects.get()
             add.comp_type = 'demand'
             add.zone = 2
             add.save()
@@ -80,6 +105,7 @@ def add_battery(request):
     return render(request, 'optimizer/add_battery.html', args)
 
 def add_solar(request):
+
     components = AddComponent.objects.all()
     if request.method == "POST":
         create_form = CreateSolarForm(request.POST)
@@ -92,9 +118,12 @@ def add_solar(request):
 
             create = create_form.save(False)
             create.component = add
+            solar_model = mgrid_model.solar.run_api(create.system_capacity, create.base_cost, create.perw_cost)
+            data = str(solar_model.json_demand)
+            ComponentOutputs(component=add, output=data)
             create.save()
 
-            return redirect('add_component')
+            return redirect('index')
     else:
         create_form = CreateSolarForm()
         add_form = AddComponentForm()

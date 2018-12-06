@@ -8,8 +8,16 @@ from django.conf import settings
 #    sql = f"DROP TABLE {table_name};"
 #    cursor.execute(sql)
 
+class CreateSystem(models.Model):
+    system_name = models.CharField(max_length=32)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.comp_name
+
 class AddComponent(models.Model):
-    comp_name = models.CharField(max_length=10, primary_key = True)
+    system_name = models.OneToOneField(CreateSystem, on_delete=models.CASCADE)
+    comp_name = models.CharField(max_length=10)
     comp_type = models.CharField(max_length=10)
     zone = models.IntegerField()
 
@@ -19,7 +27,7 @@ class AddComponent(models.Model):
 class CreateDemand(models.Model):
     demand = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    component = models.ForeignKey(AddComponent, on_delete=models.CASCADE, primary_key=True)
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
 
 class CreateBattery(models.Model):
     energy_capacity = models.IntegerField()
@@ -70,4 +78,9 @@ class CreateController(models.Model):
 
 class AddToController(models.Model):
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
+    controller = models.OneToOneField(CreateController, on_delete=models.CASCADE)
     mode = models.CharField(max_length=2, choices=(('ss', 'Solar Support'), ('ab', 'Arbitrage'), ('ps', 'Peak Shaving')))
+
+class ComponentOutputs(models.Model):
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
+    output = models.TextField()
