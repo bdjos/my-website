@@ -4,11 +4,10 @@
 
 {% block content %}
 <h2>New Grid</h2>
-<form method="POST" action={% url "add_grid" %}>
+<form method="POST" action={% url "add_grid" sys_id=sys_id %}>
   {% csrf_token %}
   {{ create_form|crispy }}
   {{ add_form|crispy }}
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
 {% endblock %}

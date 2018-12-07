@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2>New Converter</h2>
-<form method="POST" action={% url "add_converter" %}>
+<form method="POST" action={% url "add_converter" sys_id=sys_id %}>
   {% csrf_token %}
   {{ create_form|crispy }}
   {{ add_form|crispy }}

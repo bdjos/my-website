@@ -4,11 +4,10 @@
 
 {% block content %}
 <h2>New Battery</h2>
-<form method="POST" action={% url "add_battery" %}>
+<form method="POST" action={% url "add_battery" sys_id=sys_id %}>
   {% csrf_token %}
   {{ create_form|crispy }}
   {{ add_form|crispy }}
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
 {% endblock %}

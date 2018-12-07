@@ -13,10 +13,10 @@ class CreateSystem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.comp_name
+        return self.system_name
 
 class AddComponent(models.Model):
-    system_name = models.OneToOneField(CreateSystem, on_delete=models.CASCADE)
+    system_name = models.ForeignKey(CreateSystem, on_delete=models.CASCADE)
     comp_name = models.CharField(max_length=10)
     comp_type = models.CharField(max_length=10)
     zone = models.IntegerField()
@@ -35,7 +35,7 @@ class CreateBattery(models.Model):
     soc_max = models.IntegerField()
     base_cost = models.FloatField()
     energy_cost = models.FloatField()
-    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE)
     def __str__(self):
         return str(self.component)
 

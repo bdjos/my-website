@@ -17,7 +17,7 @@ class CreateDemandForm(forms.ModelForm):
 class CreateBatteryForm(forms.ModelForm):
     class Meta:
         model = CreateBattery
-        fields = ('energy_capacity', 'soc_min', 'soc_max', 'base_cost', 'energy_cost')
+        fields = ('energy_capacity', 'soc_min', 'soc_max', 'base_cost', 'energy_cost',)
 
 class CreateSolarForm(forms.ModelForm):
     class Meta:

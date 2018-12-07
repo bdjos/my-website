@@ -31,9 +31,9 @@
     <!-- Navbar -->
       <div class="tab-content border-bottom" id="myTabContent" style="margin-top:10px; padding-bottom:10px;">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-          <a class="btn btn-light" href="{% url 'add_component' %}" role="button">Add <br> Component</a>
-          <a class="btn btn-light" href="{% url 'view_system' %}" role="button">View <br> System</a>
-          <a class="btn btn-light" href="{% url 'run_model' %}" role="button">Run <br> Model</a>
+          <a class="btn btn-light" href="{% url 'add_component' sys_id=sys_id %}" role="button">Add <br> Component</a>
+          <a class="btn btn-light" href="{% url 'view_system' sys_id=sys_id %}" role="button">View <br> System</a>
+          <a class="btn btn-light" href="{% url 'run_model' sys_id=sys_id %}" role="button">Run <br> Model</a>
         </div>
       </div>
 
@@ -42,7 +42,7 @@
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
           <div class="sidebar-sticky">
             <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" style="padding-bottom:10px">
-              <span>Components</span>
+              <span>{{ system_name }}</span>
             </h4>
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" style="padding-bottom:10px">
               <span>Components</span>
@@ -50,11 +50,11 @@
             <div class="list-group">
               {% for component in components %}
               {% if component.comp_type == 'demand' %}
-                <a href="{% url 'view_demand' comp_name=component.comp_name %}" class="list-group-item list-group-item-action">
+                <a href="{% url 'view_demand' comp_name=component.comp_name sys_id=sys_id %}" class="list-group-item list-group-item-action">
                   {{ component.comp_type }} ({{ component }})
                 </a>
               {% else %}
-              <a href="{% url 'view_component' comp_name=component.comp_name %}" class="list-group-item list-group-item-action">
+              <a href="{% url 'view_component' comp_name=component.comp_name sys_id=sys_id %}" class="list-group-item list-group-item-action">
                 {{ component.comp_type }} ({{ component }})
               </a>
               {% endif %}

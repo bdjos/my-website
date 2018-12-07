@@ -1,0 +1,8 @@
+
+{% block navbar %}
+
+<a class="btn btn-light" href="{% url 'add_component' sys_id=sys_id %}" role="button">Add <br> Component</a>
+<a class="btn btn-light" href="{% url 'view_system' sys_id=sys_id %}" role="button">View <br> System</a>
+<a class="btn btn-light" href="{% url 'run_model' sys_id=sys_id %}" role="button">Run <br> Model</a>
+
+{% endblock %}

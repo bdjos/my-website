@@ -1,13 +1,58 @@
-{% extends "optimizer/index.html" %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-{% load crispy_forms_tags %}
+    <link rel="icon" href="../../../../favicon.ico">
 
-{% block content %}
-<h2>Create a System Model</h2>
-<form method="POST" action={% url "create_system" %}>
-  {% csrf_token %}
-  {{ create_form|crispy }}
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+    <title>Microgrid Optimizer</title>
 
-{% endblock %}
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <!-- Header -->
+    <div class="container-fluid" style="margin-top:15px">
+      <div class="border-bottom">
+        <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" style="padding-bottom:10px">
+          <span>Microgrid Simulator and Optimization Tool</span>
+        </h5>
+      </div>
+
+      <!-- Content -->
+      {% load crispy_forms_tags %}
+      <div class="row" style="margin-top:10px">
+        <main role="main" class="col-md-10 ml-sm-auto px-4">
+          <form method="POST" action={% url "create_system" %}>
+            {% csrf_token %}
+            {{ create_form|crispy }}
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </main>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="../../assets/js/vendor/popper.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace()
+    </script>
+  </body>
+</html>
