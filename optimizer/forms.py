@@ -45,10 +45,10 @@ class CreateControllerForm(forms.ModelForm):
         model = CreateController
         fields = ()
 
-class AddComponentForm(forms.ModelForm):
-    class Meta:
-        model = AddComponent
-        fields = ('comp_name',)
+#class AddComponentForm(forms.ModelForm):
+#    class Meta:
+#        model = AddComponent
+#        fields = (comp_name,)
 
 class AddToControllerForm(forms.ModelForm):
     class Meta:

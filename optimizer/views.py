@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from .models import AddComponent, CreateDemand, CreateSystem, ComponentOutputs
-from .forms import CreateSystemForm, CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm, AddToControllerForm
+from .forms import CreateSystemForm, CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddToControllerForm
 
 def common_args(sys_id):
     components = AddComponent.objects.all()
@@ -71,18 +71,16 @@ def add_demand(request, sys_id):
     comp_type = 'demand'
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-    of_type = components.objects.filter(comp_type=comp_type)
+    of_type = AddComponent.objects.filter(system_name=system, comp_type=comp_type)
 
     comp_num=len(of_type) + 1
+    comp_name = 'dem' + str(comp_num)
+    return_error = None
+
     if request.method == "POST":
         create_form = CreateDemandForm(request.POST, request.FILES)
-        add_form = AddComponentForm(request.POST)
-        if create_form.is_valid() and add_form.is_valid():
-            add = add_form.save(False)
-            add.system_name = system
-            add.comp_type = 'demand'
-            add.comp_num = comp_num
-            add.zone = 2
+        if create_form.is_valid():
+            add = AddComponent(system_name=system, comp_name=comp_name, comp_type='demand', comp_num=comp_num, zone=2)
             add.save()
 
             create = create_form.save(False)
@@ -95,17 +93,15 @@ def add_demand(request, sys_id):
             return_error = """Cannot add more than one demand profile. To change the existing profile,
                             select the demand profile from the system list in the sidebar and delete,
                             then add a new demand profile."""
-        else:
-            create_form = CreateDemandForm()
-            add_form = AddComponentForm()
+        create_form = CreateDemandForm()
 
     args = {}
+
     args['return_error'] = return_error
     args['sys_id'] = sys_id
     args['system_name'] = system.system_name
     args['components'] = components
     args['create_form'] = create_form
-    args['add_form'] = add_form
     return render(request, 'optimizer/add_demand.html', args)
 
 def add_battery(request, sys_id):

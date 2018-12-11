@@ -1,5 +1,7 @@
 {% extends "optimizer/index.html" %}
 
+
+
 {% load crispy_forms_tags %}
 
 {% block content %}
@@ -8,7 +10,23 @@
   {% csrf_token %}
   {{ create_form|crispy }}
   {{ add_form|crispy }}
-  <button type="submit">Upload</button>
+  {% if return_error != None %}
+    <button type="button"
+            class="btn btn-secondary popover-dismiss"
+            data-container="body"
+            data-toggle="popover"
+            data-placement="right"
+            data-content="{{ return_error }}">
+    Submit
+    </button>
+    <script>
+    $('.popover-dismiss').popover({
+    trigger: 'focus'
+    });
+    </script>
+  {% else %}
+    <button type="submit">Upload</button>
+  {% endif %}
 </form>
 
 {% endblock %}
