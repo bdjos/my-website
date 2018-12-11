@@ -19,6 +19,7 @@ class AddComponent(models.Model):
     system_name = models.ForeignKey(CreateSystem, on_delete=models.CASCADE)
     comp_name = models.CharField(max_length=10)
     comp_type = models.CharField(max_length=10)
+    comp_num = models.IntegerField()
     zone = models.IntegerField()
 
     def __str__(self):

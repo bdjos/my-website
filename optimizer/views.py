@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
-from .models import AddComponent, CreateDemand, CreateSystem
+from .models import AddComponent, CreateDemand, CreateSystem, ComponentOutputs
 from .forms import CreateSystemForm, CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddComponentForm, AddToControllerForm
 
 def common_args(sys_id):
@@ -67,8 +67,13 @@ def create_system(request):
 
 # All add component views
 def add_demand(request, sys_id):
+    # Get all relevant lists of components
+    comp_type = 'demand'
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
+    of_type = components.objects.filter(comp_type=comp_type)
+
+    comp_num=len(of_type) + 1
     if request.method == "POST":
         create_form = CreateDemandForm(request.POST, request.FILES)
         add_form = AddComponentForm(request.POST)
@@ -76,6 +81,7 @@ def add_demand(request, sys_id):
             add = add_form.save(False)
             add.system_name = system
             add.comp_type = 'demand'
+            add.comp_num = comp_num
             add.zone = 2
             add.save()
 
@@ -85,10 +91,16 @@ def add_demand(request, sys_id):
 
             return redirect('add_component', sys_id)
     else:
-        create_form = CreateDemandForm()
-        add_form = AddComponentForm()
+        if comp_num > 1:
+            return_error = """Cannot add more than one demand profile. To change the existing profile,
+                            select the demand profile from the system list in the sidebar and delete,
+                            then add a new demand profile."""
+        else:
+            create_form = CreateDemandForm()
+            add_form = AddComponentForm()
 
     args = {}
+    args['return_error'] = return_error
     args['sys_id'] = sys_id
     args['system_name'] = system.system_name
     args['components'] = components
@@ -97,8 +109,12 @@ def add_demand(request, sys_id):
     return render(request, 'optimizer/add_demand.html', args)
 
 def add_battery(request, sys_id):
+    comp_type = 'battery'
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
+    of_type = components.objects.filter(comp_type=comp_type)
+
+    comp_num=len(of_type) + 1
     if request.method == "POST":
         create_form = CreateBatteryForm(request.POST)
         add_form = AddComponentForm(request.POST)
@@ -106,6 +122,8 @@ def add_battery(request, sys_id):
             add = add_form.save(False)
             add.system_name = system
             add.comp_type = 'battery'
+            add.comp_num = comp_num
+            add.comp_name = 'bat' + str(comp_num)
             add.zone = 1
             add.save()
 
@@ -283,8 +301,8 @@ def add_controller(request, sys_id):
 def view_component(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-    active_components = AddComponent.objects.filter(zone=1) # Find all active components
-    input_component = AddComponent.objects.get(comp_name=comp_name)
+    active_components = AddComponent.objects.filter(system_name=system, zone=1) # Find all active components
+    input_component = AddComponent.objects.get(system_name=system, comp_name=comp_name)
 
     if request.method =="POST":
         return redirect('add_component')
@@ -333,7 +351,7 @@ def add_to_controller(request, sys_id, controller, add_to_cont_name):
 def view_demand(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-    demand_obj = CreateDemand.objects.get(component=AddComponent.objects.get(comp_name=comp_name))
+    demand_obj = CreateDemand.objects.get(component=AddComponent.objects.get(system_name=system, comp_name=comp_name))
     path = os.path.join('media', str(demand_obj.demand))
 
     y =[]
@@ -348,12 +366,15 @@ def view_demand(request, sys_id, comp_name):
     html = plotly.offline.plot(figure_or_data, include_plotlyjs=False, output_type='div')
 
     args = {}
+    args['sys_id'] = sys_id
+    args['system_name'] = system.system_name
     args['input_component'] = comp_name
     args['components'] = components
     args['html'] = html
     return render(request, 'optimizer/view_demand.html', args)
 
 def delete_component(request, sys_id, comp_name):
-    AddComponent.objects.filter(comp_name=comp_name).delete()
+    system = CreateSystem.objects.get(pk=sys_id)
+    AddComponent.objects.filter(system_name=system, comp_name=comp_name).delete()
 
     return redirect('index')
