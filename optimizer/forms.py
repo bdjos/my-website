@@ -4,6 +4,14 @@ from django.utils.translation import ugettext_lazy as _
 from .models import CreateSystem, CreateDemand, CreateBattery, CreateSolar, CreateConverter, CreateController, CreateGrid, CreateGenerator, AddComponent, AddToController
 
 
+#class CreateForm(forms.ModelForm):
+#    metadata = {
+#            'demand': {'model': CreateDemand, 'fields': ('demand',)},
+#            'battery': {'model': CreateBattery, 'fields': ('energy_capacity', 'soc_min', 'soc_max', 'base_cost', 'energy_cost',)},
+#    }
+#    def __init__(self, comp_type):
+#        super().__init__()
+
 class CreateSystemForm(forms.ModelForm):
     class Meta:
         model = CreateSystem
@@ -44,11 +52,6 @@ class CreateControllerForm(forms.ModelForm):
     class Meta:
         model = CreateController
         fields = ()
-
-#class AddComponentForm(forms.ModelForm):
-#    class Meta:
-#        model = AddComponent
-#        fields = (comp_name,)
 
 class AddToControllerForm(forms.ModelForm):
     class Meta:

@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models, connection
 from django.conf import settings
 
-#def drop_table(table_name):
+#def drop_table(table_name):    
 #    cursor = connection.cursor()
 #    sql = f"DROP TABLE {table_name};"
 #    cursor.execute(sql)
