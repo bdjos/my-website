@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models, connection
 from django.conf import settings
 
-#def drop_table(table_name):    
+#def drop_table(table_name):
 #    cursor = connection.cursor()
 #    sql = f"DROP TABLE {table_name};"
 #    cursor.execute(sql)
@@ -26,7 +26,8 @@ class AddComponent(models.Model):
         return self.comp_name
 
 class CreateDemand(models.Model):
-    demand = models.FileField(upload_to='documents/')
+    demand_file = models.FileField(upload_to='documents/')
+    data = models.TextField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
 

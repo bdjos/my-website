@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from .models import AddComponent, CreateDemand, CreateSystem, ComponentOutputs
-from .forms import CreateSystemForm, CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddToControllerForm
+from .forms import CreateForm, CreateSystemForm, CreateDemandForm, CreateSolarForm, CreateBatteryForm, CreateGeneratorForm, CreateConverterForm, CreateControllerForm, CreateGridForm, AddToControllerForm
 
 def index(request):
     components = AddComponent.objects.all()
@@ -59,21 +59,9 @@ def create_system(request):
     return render(request, 'optimizer/create_system.html', args)
 
 ### Add Component Defs
-def sys_info(sys_id, comp_type):
-    "Returns all the system info and html args for each component. Use in add_component views"
-    system = CreateSystem.objects.get(pk=sys_id)
-    components = AddComponent.objects.filter(system_name=system)
-    of_type = AddComponent.objects.filter(system_name=system, comp_type=comp_type)
-    comp_num=len(of_type) + 1
-    comp_name = comp_type[:3] + str(comp_num)
 
-    args = {}
-    args['sys_id'] = sys_id
-    args['system_name'] = system.system_name
-    args['components'] = components
-    return system, components, of_type, comp_num, comp_name, args
 
-class return_errors():
+class ReturnErrors():
     @classmethod
     def single_component(cls, comp_type):
         return f"""
@@ -82,42 +70,82 @@ class return_errors():
                 a new {comp_type}.
                 """
 
+class CreateData:
+    def __init__(self, sys_id, comp_type):
+        self.sys_id = sys_id
+        self.comp_type = comp_type
+        self.comp_data = {
+            'demand': {'form': CreateDemandForm, 'single_comp': 1, 'zone': 0, 'create_data': self.demand_data},
+            'battery': {'form': CreateBatteryForm, 'single_comp': 0, 'zone':1, 'create_data': None},
+            'solar': {'form': CreateSolarForm, 'single_comp': 1, 'zone': 0, 'create_data': self.solar_data},
+            'generator': {'form': CreateGeneratorForm, 'single_comp': 1, 'zone': 1, 'create_data': None},
+            'converter': {'form': CreateConverterForm, 'single_comp': 1, 'zone': 1, 'create_data': None},
+            'controller': {'form': CreateControllerForm, 'single_comp': 1, 'zone': 1, 'create_data': None},
+            'grid': {'form': CreateGridForm, 'single_comp': 1, 'zone': 2, 'create_data': None},
+            }
+        self.comp_single = self.comp_data[self.comp_type]['single_comp']
+        self.create_data = self.comp_data[self.comp_type]['create_data']
+        self.system = CreateSystem.objects.get(pk=self.sys_id)
+        self.components = AddComponent.objects.filter(system_name=self.system)
+        self.of_type = AddComponent.objects.filter(system_name=self.system, comp_type=self.comp_type)
+        self.comp_num=len(self.of_type) + 1
+        self.comp_name = self.comp_type[:3] + str(self.comp_num)
+        self.create_form = CreateForm
+        self.create_form.Meta.model = CreateDemand
+        self.create_form.Meta.fields = ('demand_file',)
+
+    def get_args(self):
+        "Returns all the system info and html args for each component. Use in add_component views"
+        args = {}
+        args['sys_id'] = self.sys_id
+        args['system_name'] = self.system.system_name
+        args['components'] = self.components
+        return args
+
+    def add_component(self):
+        add = AddComponent(
+                system_name=system,
+                comp_name=comp_name,
+                comp_type=comp_type,
+                comp_num=comp_num,
+                zone=self.comp_data[self.comp_type]['zone'])
+        add.save()
+        return add
+
+    def demand_data(self):
+        path = os.path.join('media', str(demand_obj.demand))
+        y =[]
+        with open(path, 'r') as file:
+            reader = csv.reader(file, delimiter=',')
+            for val in reader:
+                y.append(val[0])
+        return str(y)
+
+    def solar_data(self):
+        return None
+
 def add_system_component(request, sys_id, comp_type):
-    comp_type = comp_type
-    system, components, of_type, comp_num, comp_name, args = sys_info(sys_id, comp_type)
-    comp_data =  {
-                'demand': {'form': CreateDemandForm, 'single_comp': 1, 'zone': 0},
-                'battery': {'form': CreateBatteryForm, 'single_comp': 0, 'zone':1},
-                'solar': {'form': CreateSolarForm, 'single_comp': 1, 'zone': 0},
-                'generator': {'form': CreateGeneratorForm, 'single_comp': 1, 'zone': 1},
-                'converter': {'form': CreateConverterForm, 'single_comp': 1, 'zone': 1},
-                'controller': {'form': CreateControllerForm, 'single_comp': 1, 'zone': 1},
-                'grid': {'form': CreateGridForm, 'single_comp': 1, 'zone': 2},
-                }
+    comp_data = CreateData(sys_id, comp_type)
+    args = comp_data.get_args()
     return_error = None
 
     if request.method == "POST":
-        create_form = comp_data[comp_type]['form'](request.POST, request.FILES)
+        create_form = comp_data.create_form(request.POST, request.FILES)
         if create_form.is_valid():
-            add = AddComponent(
-                            system_name=system,
-                            comp_name=comp_name,
-                            comp_type=comp_type,
-                            comp_num=comp_num,
-                            zone=comp_data[comp_type]['zone'])
-            add.save()
+            add = comp_data.add_component()
 
             create = create_form.save(False)
             create.component = add
+            create.data = comp_data.create_data
             create.save()
-
             return redirect('add_component', sys_id)
+
     else:
-        if comp_num > 1 & comp_data[comp_type]['single_comp']==1:
-            return_error = return_errors.single_component(comp_type)
+        if comp_data.comp_num > 1 & comp_data.comp_single==1:
+            return_error = ReturnErrors.single_component(comp_type)
         else:
             return_error = None
-        create_form = comp_data[comp_type]['form']()
+        create_form = comp_data.create_form
 
     args['return_error'] = return_error
     args['create_form'] = create_form

@@ -12,6 +12,11 @@ from .models import CreateSystem, CreateDemand, CreateBattery, CreateSolar, Crea
 #    def __init__(self, comp_type):
 #        super().__init__()
 
+class CreateForm(forms.ModelForm):
+    class Meta:
+        model = None
+        field = None
+
 class CreateSystemForm(forms.ModelForm):
     class Meta:
         model = CreateSystem
@@ -20,7 +25,7 @@ class CreateSystemForm(forms.ModelForm):
 class CreateDemandForm(forms.ModelForm):
     class Meta:
         model = CreateDemand
-        fields = ('demand',)
+        fields = ('demand_file',)
 
 class CreateBatteryForm(forms.ModelForm):
     class Meta:
