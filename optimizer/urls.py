@@ -5,7 +5,6 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    #path('', views.index, name='index'),
     path('', views.create_system, name='create_system'),
     path('sys_id_<str:sys_id>/add_component/', views.add_component, name='add_component'),
     path('sys_id_<str:sys_id>/view_system/', views.view_system, name='view_system'),

@@ -99,7 +99,12 @@ def add_system_component(request, sys_id, comp_type):
     if request.method == "POST":
         create_form = comp_data[comp_type]['form'](request.POST, request.FILES)
         if create_form.is_valid():
-            add = AddComponent(system_name=system, comp_name=comp_name, comp_type=comp_type, comp_num=comp_num, zone=zone)
+            add = AddComponent(
+                            system_name=system,
+                            comp_name=comp_name,
+                            comp_type=comp_type,
+                            comp_num=comp_num,
+                            zone=comp_data[comp_type]['zone'])
             add.save()
 
             create = create_form.save(False)
@@ -116,8 +121,9 @@ def add_system_component(request, sys_id, comp_type):
 
     args['return_error'] = return_error
     args['create_form'] = create_form
+    args['comp_type'] = comp_type
 
-    return render(request, f'optimizer/add_{comp_type}.html', args)
+    return render(request, f'optimizer/add_system_component.html', args)
 
 # All view component views
 def view_component(request, sys_id, comp_name):
@@ -199,4 +205,4 @@ def delete_component(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)
     AddComponent.objects.filter(system_name=system, comp_name=comp_name).delete()
 
-    return redirect('index')
+    return redirect('add_component', sys_id=sys_id)

@@ -1,15 +1,12 @@
 {% extends "optimizer/index.html" %}
 
-
-
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h2>Add Demand Profile</h2>
+<h2>Add {{comp_type}}</h2>
 <form method="POST" enctype="multipart/form-data">
   {% csrf_token %}
   {{ create_form|crispy }}
-  {{ add_form|crispy }}
   {% if return_error != None %}
     <button type="button"
             class="btn btn-secondary popover-dismiss"
