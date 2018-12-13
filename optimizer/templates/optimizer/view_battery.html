@@ -1,13 +1,16 @@
 {% extends "optimizer/index.html" %}
 
-{% load crispy_forms_tags %}
-
 {% block content %}
-<h2>New Battery</h2>
-<form method="GET" action={% url "add_battery" sys_id=sys_id%}>
-  {% csrf_token %}
-  {{ create_form|crispy }}
-  {{ add_form|crispy }}
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+<div class="row" style="padding-left:50px">
+  <div class="col-md-6">
+    <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+      <span>Battery ({{ input_component }})</span>
+    </h4>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    {% include 'optimizer/includes/deletecomponent.html' %}
+  </div>
+</div>
 {% endblock %}
