@@ -152,10 +152,21 @@ def add_system_component(request, sys_id, comp_type):
 
 # All view component views
 def view_component(request, sys_id, comp_name):
+    comp_models = {
+                'demand': createdemand_set,
+                'battery': createbattery_set,
+                'solar': createsolar_set,
+                'generator': creategenerator_set,
+                'converter': createconverter_set,
+                'controller': createcontroller_set,
+                'grid': creategrid_set,
+                }
+
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
     active_components = AddComponent.objects.filter(system_name=system, zone=1) # Find all active components
     input_component = AddComponent.objects.get(system_name=system, comp_name=comp_name)
+    input_component_object = input_component.comp_models(input_component.comp_type)
 
     if request.method =="POST":
         return redirect('add_component')
