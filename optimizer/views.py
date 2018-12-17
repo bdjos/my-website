@@ -73,6 +73,7 @@ class CreateData:
     def __init__(self, sys_id, comp_type):
         self.sys_id = sys_id
         self.comp_type = comp_type
+        self.system = CreateSystem.objects.get(pk=self.sys_id)
         self.comp_data = {
             'demand': {'single_comp': 1, 'zone': 0, 'create_data': self.demand_data},
             'battery': {'single_comp': 0, 'zone':1, 'create_data': None},
@@ -84,7 +85,7 @@ class CreateData:
             }
         self.comp_single = self.comp_data[self.comp_type]['single_comp']
         self.create_data = self.comp_data[self.comp_type]['create_data']
-        self.system = CreateSystem.objects.get(pk=self.sys_id)
+
         self.components = AddComponent.objects.filter(system_name=self.system)
         self.of_type = AddComponent.objects.filter(system_name=self.system, comp_type=self.comp_type)
         self.comp_num=len(self.of_type) + 1
@@ -152,21 +153,19 @@ def add_system_component(request, sys_id, comp_type):
 
 # All view component views
 def view_component(request, sys_id, comp_name):
-    comp_models = {
-                'demand': createdemand_set,
-                'battery': createbattery_set,
-                'solar': createsolar_set,
-                'generator': creategenerator_set,
-                'converter': createconverter_set,
-                'controller': createcontroller_set,
-                'grid': creategrid_set,
-                }
-
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-    active_components = AddComponent.objects.filter(system_name=system, zone=1) # Find all active components
+    active_components = AddComponent.objects.filter(system_name=system, zone=1)
     input_component = AddComponent.objects.get(system_name=system, comp_name=comp_name)
-    input_component_object = input_component.comp_models(input_component.comp_type)
+    input_component_type = input_component.comp_type
+    # Get a dict of values for the component
+    input_component_qryset = AddComponent.objects.filter(system_name=system, comp_name=comp_name).values()[0]
+    qryset_list = []
+    for key in input_component_qryset:
+        qryset_list.append((key, input_component_qryset[key]))
+
+    model_name = 'create' + input_component_type
+    input_component_object = getattr(AddComponent, model_name)
 
     if request.method =="POST":
         return redirect('add_component')
@@ -176,9 +175,11 @@ def view_component(request, sys_id, comp_name):
     args['system_name'] = system.system_name
     args['components'] = components
     args['input_component'] = input_component
+    args['qryset_list'] = qryset_list
     args['active_components'] = active_components
-    args['comp_name']=comp_name
-    return render(request, f'optimizer/view_{input_component.comp_type}.html', args)
+    args['comp_name'] = comp_name
+    args['comp_type'] = input_component_type.capitalize()
+    return render(request, f'optimizer/view_component.html', args)
 
 def add_to_controller(request, sys_id, controller, add_to_cont_name):
     system = CreateSystem.objects.get(pk=sys_id)

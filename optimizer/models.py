@@ -17,7 +17,6 @@ class CreateSystem(models.Model):
 
 class AddComponent(models.Model):
     system_name = models.ForeignKey(CreateSystem, on_delete=models.CASCADE)
-    comp_obj = models.ForeignKey(CreateDemand, on_delete=models.CASCADE, primary_key=True)
     comp_name = models.CharField(max_length=10)
     comp_type = models.CharField(max_length=10)
     comp_num = models.IntegerField()
@@ -38,7 +37,7 @@ class CreateBattery(models.Model):
     soc_max = models.IntegerField()
     base_cost = models.FloatField()
     energy_cost = models.FloatField()
-    component = models.ForeignKey(AddComponent, on_delete=models.CASCADE)
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
         return str(self.component)
 
@@ -75,9 +74,8 @@ class CreateGrid(models.Model):
 
 class CreateController(models.Model):
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
-
     def __str__(self):
-        return str(self.system_capacity)
+        return str(self.component)
 
 class AddToController(models.Model):
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
