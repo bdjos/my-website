@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
-from .models import AddComponent, CreateDemand, CreateSystem, ComponentOutputs
+from .models import *
 from .forms import create_component_form, CreateSystemForm, AddToControllerForm
 
 def index(request):
@@ -70,13 +70,14 @@ class ReturnErrors:
                 """
 
 class CreateData:
+
     def __init__(self, sys_id, comp_type):
         self.sys_id = sys_id
         self.comp_type = comp_type
         self.system = CreateSystem.objects.get(pk=self.sys_id)
         self.comp_data = {
             'demand': {'single_comp': 1, 'zone': 0, 'create_data': self.demand_data},
-            'battery': {'single_comp': 0, 'zone':1, 'create_data': None},
+            'battery': {'single_comp': 0, 'zone': 1, 'create_data': None},
             'solar': {'single_comp': 1, 'zone': 0, 'create_data': self.solar_data},
             'generator': {'single_comp': 1, 'zone': 1, 'create_data': None},
             'converter': {'single_comp': 1, 'zone': 1, 'create_data': None},
@@ -92,7 +93,7 @@ class CreateData:
         self.comp_name = self.comp_type[:3] + str(self.comp_num)
 
     def get_args(self):
-        "Returns all the system info and html args for each component. Use in add_component views"
+        """Returns all the system info and html args for each component. Use in add_component views"""
         args = {}
         args['sys_id'] = self.sys_id
         args['system_name'] = self.system.system_name
@@ -159,13 +160,14 @@ def view_component(request, sys_id, comp_name):
     input_component = AddComponent.objects.get(system_name=system, comp_name=comp_name)
     input_component_type = input_component.comp_type
     # Get a dict of values for the component
-    input_component_qryset = AddComponent.objects.filter(system_name=system, comp_name=comp_name).values()[0]
+
+    model_name = 'Create' + input_component_type.capitalize()
+    input_component_object = getattr(AddComponent, model_name.lower())
+    input_component_qryset = getattr(model_name, objects, filter(component=input_component_object))
+    input_component_values = input_component_qryset.values()[0]
     qryset_list = []
     for key in input_component_qryset:
-        qryset_list.append((key, input_component_qryset[key]))
-
-    model_name = 'create' + input_component_type
-    input_component_object = getattr(AddComponent, model_name)
+        qryset_list.append((key, input_component_values[key]))
 
     if request.method =="POST":
         return redirect('add_component')

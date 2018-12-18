@@ -10,3 +10,4 @@ db.sqlite3
 settings.py
 solar-optimizer
 pvoptimizer
+.idea
