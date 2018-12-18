@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from .models import *
-from .forms import create_component_form, CreateSystemForm, AddToControllerForm
+from .forms import *
 
 def index(request):
     components = AddComponent.objects.all()
@@ -85,8 +85,6 @@ class CreateData:
             'grid': {'single_comp': 1, 'zone': 2, 'create_data': None},
             }
         self.comp_single = self.comp_data[self.comp_type]['single_comp']
-        self.create_data = self.comp_data[self.comp_type]['create_data']
-
         self.components = AddComponent.objects.filter(system_name=self.system)
         self.of_type = AddComponent.objects.filter(system_name=self.system, comp_type=self.comp_type)
         self.comp_num=len(self.of_type) + 1
@@ -100,16 +98,6 @@ class CreateData:
         args['components'] = self.components
         return args
 
-    def add_component(self):
-        add = AddComponent(
-                system_name=self.system,
-                comp_name=self.comp_name,
-                comp_type=self.comp_type,
-                comp_num=self.comp_num,
-                zone=self.comp_data[self.comp_type]['zone'])
-        add.save()
-        return add
-
     def demand_data(self):
         path = os.path.join('media', str(demand_obj.demand))
         y =[]
@@ -119,8 +107,21 @@ class CreateData:
                 y.append(val[0])
         return str(y)
 
-    def solar_data(self):
-        return None
+    def solar_data(self, *args):
+        system_capacity, base_cost, perw_cost = args
+        solar_object = mgrid_model.solar.run_api(system_capacity, base_cost, perw_cost)
+        return solar_object.json_demand
+
+
+    def add_component(self):
+        add = AddComponent(
+                system_name=self.system,
+                comp_name=self.comp_name,
+                comp_type=self.comp_type,
+                comp_num=self.comp_num,
+                zone=self.comp_data[self.comp_type]['zone'])
+        add.save()
+        return add
 
 def add_system_component(request, sys_id, comp_type):
     comp_data = CreateData(sys_id, comp_type)
@@ -135,7 +136,16 @@ def add_system_component(request, sys_id, comp_type):
 
             create = create_form.save(False)
             create.component = add
-            create.data = comp_data.create_data
+
+            #Generate graph data if components are demand or solar
+            if comp_type == 'demand':
+                create.data = comp_data.gen_graph_data()
+            elif comp_type == 'solar':
+                create.data = comp_data.gen_solar_data(
+                                                create.system_capacity,
+                                                create.base_cost,
+                                                create.perw_cost
+                                                )
             create.save()
             return redirect('add_component', sys_id)
 
@@ -161,9 +171,17 @@ def view_component(request, sys_id, comp_name):
     input_component_type = input_component.comp_type
     # Get a dict of values for the component
 
-    model_name = 'Create' + input_component_type.capitalize()
-    input_component_object = getattr(AddComponent, model_name.lower())
-    input_component_qryset = getattr(model_name, objects, filter(component=input_component_object))
+    models = {
+        'demand': CreateDemand,
+        'battery': CreateBattery,
+        'solar': CreateSolar,
+        'generator': CreateGenerator,
+        'converter': CreateConverter,
+        'controller': CreateController,
+        'grid': CreateGrid,
+        }
+
+    input_component_qryset = models[input_component_type].objects.filter(component__system_name=system, component__comp_name=comp_name)
     input_component_values = input_component_qryset.values()[0]
     qryset_list = []
     for key in input_component_qryset:

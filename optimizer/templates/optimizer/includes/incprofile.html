@@ -1,7 +1,14 @@
+<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" style="padding-bottom:10px">
+  <span> Specifications </span>
+</h6>
+
+{% for key, val in qryset_list %}
 <div class="row">
-  <div class="col-md-11">
-    {% for key, val in qryset_list %}
-      <li> {{ key }}: {{ val }} </li>
-    {% endfor %}
+  <div class="col-3">
+    {{ key }}
+  </div>
+  <div class="col-3">
+    {{ val }}
   </div>
 </div>
+{% endfor %}
