@@ -70,6 +70,9 @@ class ReturnErrors:
                 """
 
 class CreateData:
+    """
+    Abstracts the system component characteristics for the add_system_component view
+    """
 
     def __init__(self, sys_id, comp_type):
         self.sys_id = sys_id
@@ -98,8 +101,8 @@ class CreateData:
         args['components'] = self.components
         return args
 
-    def demand_data(self):
-        path = os.path.join('media', str(demand_obj.demand))
+    def demand_data(self, demand_file):
+        path = os.path.join('media', str(demand_file))
         y =[]
         with open(path, 'r') as file:
             reader = csv.reader(file, delimiter=',')
@@ -112,7 +115,6 @@ class CreateData:
         solar_object = mgrid_model.solar.run_api(system_capacity, base_cost, perw_cost)
         return solar_object.json_demand
 
-
     def add_component(self):
         add = AddComponent(
                 system_name=self.system,
@@ -124,6 +126,7 @@ class CreateData:
         return add
 
 def add_system_component(request, sys_id, comp_type):
+
     comp_data = CreateData(sys_id, comp_type)
 
     args = comp_data.get_args()
@@ -134,14 +137,15 @@ def add_system_component(request, sys_id, comp_type):
         if create_form.is_valid():
             add = comp_data.add_component()
 
-            create = create_form.save(False)
+            create = create_form.save(False) # Create Component object
             create.component = add
+            create.save()
 
             #Generate graph data if components are demand or solar
             if comp_type == 'demand':
-                create.data = comp_data.gen_graph_data()
+                create.data = comp_data.demand_data(create.demand_file)
             elif comp_type == 'solar':
-                create.data = comp_data.gen_solar_data(
+                create.data = comp_data.solar_data(
                                                 create.system_capacity,
                                                 create.base_cost,
                                                 create.perw_cost
@@ -181,11 +185,25 @@ def view_component(request, sys_id, comp_name):
         'grid': CreateGrid,
         }
 
+    # Get all component specs for displaying in view
     input_component_qryset = models[input_component_type].objects.filter(component__system_name=system, component__comp_name=comp_name)
     input_component_values = input_component_qryset.values()[0]
     qryset_list = []
-    for key in input_component_qryset:
+
+    for key in input_component_values:
         qryset_list.append((key, input_component_values[key]))
+
+    # If demand or solar generate graph data
+    html = None # Blank html for non solar or demand objects
+    if input_component_type == 'demand' or input_component_type == 'solar':
+        y = models[input_component_type].objects.get(component__system_name=system, component__comp_name=comp_name).data
+        y = y.split(',')
+
+        x = list(range(len(y)))
+        figure_or_data = [go.Scatter({'x':x, 'y':y})]
+
+        html = plotly.offline.plot(figure_or_data, include_plotlyjs=False, output_type='div')
+
 
     if request.method =="POST":
         return redirect('add_component')
@@ -199,6 +217,7 @@ def view_component(request, sys_id, comp_name):
     args['active_components'] = active_components
     args['comp_name'] = comp_name
     args['comp_type'] = input_component_type.capitalize()
+    args['html'] = html
     return render(request, f'optimizer/view_component.html', args)
 
 def add_to_controller(request, sys_id, controller, add_to_cont_name):
