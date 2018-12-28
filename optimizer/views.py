@@ -235,7 +235,8 @@ def view_component(request, sys_id, comp_name):
 
     ##########Deal with this##############
     for key in input_component_values:
-        qryset_list.append((key, input_component_values[key]))
+        if key in model_info[input_component_type]['spec_fields']:
+            qryset_list.append((key, input_component_values[key]))
 
     # If demand or solar generate graph data
     html = None # Blank html for non solar or demand objects
@@ -299,32 +300,6 @@ def add_to_controller(request, sys_id, controller, add_to_cont_name):
     return render(request, 'optimizer/configure_controller.html', args)
     # return render(request, 'optimizer/configure_controller.html', args)
 
-def view_demand(request, sys_id, comp_name):
-    system = CreateSystem.objects.get(pk=sys_id)
-    components = AddComponent.objects.filter(system_name=system)
-    comp = AddComponent.objects.get(system_name=system, comp_name=comp_name)
-    demand_obj = CreateDemand.objects.get(component=AddComponent.objects.get(system_name=system, comp_name=comp_name))
-    path = os.path.join('media', str(demand_obj.demand_file))
-
-    y =[]
-    with open(path, 'r') as file:
-        reader = csv.reader(file, delimiter=',')
-        for val in reader:
-            y.append(val[0])
-
-    x = list(range(len(y)))
-    figure_or_data = [go.Scatter({'x':x, 'y':y})]
-
-    html = plotly.offline.plot(figure_or_data, include_plotlyjs=False, output_type='div')
-
-    args = {}
-    args['sys_id'] = sys_id
-    args['system_name'] = system.system_name
-    args['input_component'] = comp_name
-    args['comp_type'] = comp.comp_type.capitalize()
-    args['components'] = components
-    args['html'] = html
-    return render(request, 'optimizer/view_demand.html', args)
 
 def delete_component(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)

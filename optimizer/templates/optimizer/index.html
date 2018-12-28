@@ -54,15 +54,9 @@
             </h6>
             <div class="list-group">
               {% for component in components %}
-              {% if component.comp_type == 'demand' %}
-                <a href="{% url 'view_demand' comp_name=component.comp_name sys_id=sys_id %}" class="list-group-item list-group-item-action">
-                  {{ component.comp_type }} ({{ component }})
-                </a>
-              {% else %}
               <a href="{% url 'view_component' comp_name=component.comp_name sys_id=sys_id %}" class="list-group-item list-group-item-action">
                 {{ component.comp_type }} ({{ component }})
               </a>
-              {% endif %}
               {% endfor %}
             </div>
           </div>
