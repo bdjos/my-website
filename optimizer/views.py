@@ -175,28 +175,75 @@ def view_component(request, sys_id, comp_name):
     input_component_type = input_component.comp_type
     # Get a dict of values for the component
 
-    models = {
-        'demand': CreateDemand,
-        'battery': CreateBattery,
-        'solar': CreateSolar,
-        'generator': CreateGenerator,
-        'converter': CreateConverter,
-        'controller': CreateController,
-        'grid': CreateGrid,
+    model_info = {
+        'demand': {
+            'model': CreateDemand,
+            'spec_fields': []},
+        'battery': {
+            'model': CreateBattery,
+            'spec_fields': [
+                'energy_capacity',
+                'soc_min',
+                'soc_max',
+                'base_cost',
+                'energy_cost'
+            ]
+        },
+        'solar': {
+            'model': CreateSolar,
+            'spec_fields': [
+                'system_capacity',
+                'base_cost',
+                'perw_cost'
+            ]
+        },
+        'generator': {
+            'model': CreateGenerator,
+            'spec_fields': [
+                'power',
+                'base_cost',
+                'fuel_cost'
+            ]
+        },
+        'converter': {
+            'model': CreateConverter,
+            'spec_fields': [
+                'power',
+                'base_cost',
+                'power_cost',
+            ]
+        },
+        'controller': {
+            'model': CreateController,
+            'spec_fields': []},
+        'grid': {
+            'model': CreateGrid,
+            'spec_fields': [
+                'energy_cost',
+                'nm_allowed'
+            ]
         }
+    }
 
     # Get all component specs for displaying in view
-    input_component_qryset = models[input_component_type].objects.filter(component__system_name=system, component__comp_name=comp_name)
+    input_component_qryset = model_info[input_component_type]['model'].objects.filter(
+        component__system_name=system,
+        component__comp_name=comp_name
+    )
     input_component_values = input_component_qryset.values()[0]
     qryset_list = []
 
+    ##########Deal with this##############
     for key in input_component_values:
         qryset_list.append((key, input_component_values[key]))
 
     # If demand or solar generate graph data
     html = None # Blank html for non solar or demand objects
     if input_component_type == 'demand' or input_component_type == 'solar':
-        y = models[input_component_type].objects.get(component__system_name=system, component__comp_name=comp_name).data
+        y = model_info[input_component_type]['model'].objects.get(
+            component__system_name=system,
+            component__comp_name=comp_name
+        ).data
         y = y.split(',')
 
         x = list(range(len(y)))
