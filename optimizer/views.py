@@ -248,9 +248,26 @@ def view_component(request, sys_id, comp_name):
         y = y.split(',')
 
         x = list(range(len(y)))
-        figure_or_data = [go.Scatter({'x':x, 'y':y})]
+        trace1 = go.Scatter({'x':x, 'y':y})
+        data = [trace1]
+        layout = go.Layout(
+            xaxis=dict(
+                title='Date',
+                titlefont=dict(
+                    size=18,
+                    color='#7f7f7f'
+                )
+            ),
+            yaxis=dict(
+                title='kW',
+                titlefont=dict(
+                    size=18,
+                    color='#7f7f7f'
+                )
+            )
+        )
 
-        html = plotly.offline.plot(figure_or_data, include_plotlyjs=False, output_type='div')
+        html = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div')
 
 
     if request.method =="POST":
