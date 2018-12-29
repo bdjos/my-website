@@ -233,7 +233,6 @@ def view_component(request, sys_id, comp_name):
     input_component_values = input_component_qryset.values()[0]
     qryset_list = []
 
-    ##########Deal with this##############
     for key in input_component_values:
         if key in model_info[input_component_type]['spec_fields']:
             qryset_list.append((key, input_component_values[key]))
@@ -290,9 +289,8 @@ def add_to_controller(request, sys_id, controller, add_to_cont_name):
     components = AddComponent.objects.filter(system_name=system)
     input_component = AddComponent.objects.get(comp_name=add_to_cont_name)
 
-    #
     if request.method == "POST":
-        if input_component.comp_type=='battery':
+        if input_component.comp_type == 'battery':
             add_form = AddToControllerForm(request.POST)
             if add_form.is_valid():
                 add = add_form.save(False)

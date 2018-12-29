@@ -11,6 +11,9 @@
 {% if html != None %}
   {% include 'optimizer/includes/incplotly.html' %}
 {% endif %}
+{% if comp_name == 'controller' %}
+  {% include 'optimizer/includes/configcont.html' %}
+{% endif %}
 {% include 'optimizer/includes/incprofile.html' %}
 <div class="row">
   <div class="col-md-6">
