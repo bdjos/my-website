@@ -34,18 +34,6 @@ class CreateDemand(models.Model):
     def __str__(self):
         return str(self.component)
 
-class CreateBattery(models.Model):
-    energy_capacity = models.IntegerField()
-    soc_min = models.IntegerField()
-    soc_max = models.IntegerField()
-    base_cost = models.FloatField()
-    energy_cost = models.FloatField()
-    controller_configured = models.BinaryField()
-    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
-
-    def __str__(self):
-        return str(self.component)
-
 class CreateSolar(models.Model):
     system_capacity = models.IntegerField()
     base_cost = models.FloatField()
@@ -57,11 +45,23 @@ class CreateSolar(models.Model):
     def __str__(self):
         return str(self.component)
 
+class CreateBattery(models.Model):
+    energy_capacity = models.IntegerField()
+    soc_min = models.IntegerField()
+    soc_max = models.IntegerField()
+    base_cost = models.FloatField()
+    energy_cost = models.FloatField()
+    controller_configured = models.BooleanField(default=False)
+    component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
+
+    def __str__(self):
+        return str(self.component)
+
 class CreateConverter(models.Model):
     power = models.IntegerField()
     base_cost = models.FloatField()
     power_cost = models.FloatField()
-    controller_configured = models.BinaryField()
+    controller_configured = models.BooleanField(default=False)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
 
     def __str__(self):
@@ -71,7 +71,7 @@ class CreateGenerator(models.Model):
     power = models.IntegerField()
     base_cost = models.FloatField()
     fuel_cost = models.FloatField()
-    controller_configured = models.BinaryField()
+    controller_configured = models.BooleanField(default=False)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
         return str(self.component)
@@ -80,7 +80,7 @@ class CreateGrid(models.Model):
     energy_cost = models.FloatField()
     nm_allowed = models.BooleanField(default=False)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
-    def __str__(self):s
+    def __str__(self):
         return str(self.component)
 
 class CreateController(models.Model):

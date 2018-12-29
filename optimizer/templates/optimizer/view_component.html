@@ -8,13 +8,20 @@
     </h4>
   </div>
 </div>
+
 {% if html != None %}
   {% include 'optimizer/includes/incplotly.html' %}
 {% endif %}
-{% if comp_name == 'controller' %}
-  {% include 'optimizer/includes/configcont.html' %}
-{% endif %}
+
 {% include 'optimizer/includes/incprofile.html' %}
+
+{% if comp_type == "Controller" %}
+  <div class="row">
+    <div class="col-md-6">
+      {% include 'optimizer/includes/configcont.html' %}
+    </div>
+  </div>
+{% endif %}
 <div class="row">
   <div class="col-md-6">
     {% include 'optimizer/includes/deletecomponent.html' %}
