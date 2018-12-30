@@ -1,4 +1,5 @@
 Django~=2.0.6
 django-crispy-forms
 django-import-export
+plotly
 git+https://github.com/bdjos/mgridoptimizer.git
