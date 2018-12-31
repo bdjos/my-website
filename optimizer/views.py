@@ -284,6 +284,18 @@ def view_component(request, sys_id, comp_name):
     args['html'] = html
     return render(request, f'optimizer/view_component.html', args)
 
+def configure_controller(request, sys_id, comp_name):
+    system = CreateSystem.objects.get(pk=sys_id)
+    components = AddComponent.objects.filter(system_name=system)
+
+    args = {
+        'sys_id': sys_id,
+        'components': components,
+        'controller': comp_name
+    }
+
+    return render(request, 'optimizer/configure_controller.html', args)
+
 def add_to_controller(request, sys_id, controller, add_to_cont_name):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
