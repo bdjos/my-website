@@ -266,7 +266,7 @@ def view_component(request, sys_id, comp_name):
             )
         )
 
-        html = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div')
+        html = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div', link_text='')
 
 
     if request.method =="POST":
