@@ -90,8 +90,17 @@ class CreateData:
         self.comp_single = self.comp_data[self.comp_type]['single_comp']
         self.components = AddComponent.objects.filter(system_name=self.system)
         self.of_type = AddComponent.objects.filter(system_name=self.system, comp_type=self.comp_type)
-        self.comp_num=len(self.of_type) + 1
-        self.comp_name = self.comp_type[:3] + str(self.comp_num)
+        self.comp_num = len(self.of_type) + 1
+        self.comp_name = self.get_comp_name(self.comp_type, str(self.comp_num))
+
+    @staticmethod
+    def get_comp_name(comp_type, comp_num):
+        vowels = ['a', 'e', 'i', 'o', 'u']
+        for letter in comp_type:
+            if letter in vowels:
+                comp_type = comp_type.replace(letter, '')
+
+        return (comp_type[:3] + comp_num)
 
     def get_args(self):
         """Returns all the system info and html args for each component. Use in add_component views"""
@@ -154,7 +163,7 @@ def add_system_component(request, sys_id, comp_type):
             return redirect('add_component', sys_id)
 
     else:
-        if comp_data.comp_num > 1 & comp_data.comp_single==1:
+        if comp_data.comp_num > 1 & comp_data.comp_single == 1:
             return_error = ReturnErrors.single_component(comp_type)
         else:
             return_error = None
@@ -290,6 +299,7 @@ def configure_controller(request, sys_id, comp_name):
 
     args = {
         'sys_id': sys_id,
+        'system_name': system.system_name,
         'components': components,
         'controller': comp_name
     }
