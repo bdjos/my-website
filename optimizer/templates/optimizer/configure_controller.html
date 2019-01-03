@@ -17,11 +17,11 @@
     </h6>
     <div class="row">
       <div class="col-md-6">
-        {% for component in component_objects %)
+        {% for component in controller_not_configured %}
           <a href="{% url 'view_component' comp_name=component.comp_name sys_id=sys_id %}" class="list-group-item list-group-item-action">
             {{ component.comp_type }} ({{ component }})
           </a>
-        (% endfor %)
+        {% endfor %}
       </div>
     </div>
   </div>
@@ -31,9 +31,9 @@
     </h6>
     <div class="row">
       <div class="col-md-6">
-        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-          <span>Not Configured</span>
-        </h6>
+        {% for component in controller_configured %}
+          {{ component.comp_type }} ({{ component }})
+        {% endfor %}
       </div>
     </div>
   </div>

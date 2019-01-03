@@ -84,8 +84,8 @@ class CreateData:
             'solar': {'single_comp': 1, 'zone': 0, 'create_data': self.solar_data},
             'generator': {'single_comp': 1, 'zone': 1, 'create_data': None},
             'converter': {'single_comp': 1, 'zone': 1, 'create_data': None},
-            'controller': {'single_comp': 1, 'zone': 1, 'create_data': None},
-            'grid': {'single_comp': 1, 'zone': 2, 'create_data': None},
+            'controller': {'single_comp': 1, 'zone': 2, 'create_data': None},
+            'grid': {'single_comp': 1, 'zone': 3, 'create_data': None},
             }
         self.comp_single = self.comp_data[self.comp_type]['single_comp']
         self.components = AddComponent.objects.filter(system_name=self.system)
@@ -130,7 +130,8 @@ class CreateData:
                 comp_name=self.comp_name,
                 comp_type=self.comp_type,
                 comp_num=self.comp_num,
-                zone=self.comp_data[self.comp_type]['zone'])
+                zone=self.comp_data[self.comp_type]['zone']
+        )
         add.save()
         return add
 
