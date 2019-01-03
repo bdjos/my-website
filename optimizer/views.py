@@ -88,6 +88,7 @@ class CreateData:
             'grid': {'single_comp': 1, 'zone': 3, 'create_data': None},
             }
         self.comp_single = self.comp_data[self.comp_type]['single_comp']
+        self.comp_zone = self.comp_data[self.comp_type]['zone']
         self.components = AddComponent.objects.filter(system_name=self.system)
         self.of_type = AddComponent.objects.filter(system_name=self.system, comp_type=self.comp_type)
         self.comp_num = len(self.of_type) + 1
@@ -151,7 +152,7 @@ def add_system_component(request, sys_id, comp_type):
             create.component = add
             create.save()
 
-            #Generate graph data if components are demand or solar
+            # Generate graph data if components are demand or solar
             if comp_type == 'demand':
                 create.data = comp_data.demand_data(create.demand_file)
             elif comp_type == 'solar':
@@ -161,6 +162,12 @@ def add_system_component(request, sys_id, comp_type):
                                                 create.perw_cost
                                                 )
             create.save()
+
+            # Add to controller table if components are in zone 1
+            if add.zone == 1:
+                add_controller_object = AddToController(component=add, mode='nc')
+                add_controller_object.save()
+
             return redirect('add_component', sys_id)
 
     else:
@@ -299,12 +306,17 @@ def configure_controller(request, sys_id, comp_name):
     components = AddComponent.objects.filter(system_name=system)
 
     controller_objects = AddComponent.objects.filter(system_name=system, zone=1)
+    controller_not_configured = AddComponent.objects.filter(addtocontroller__configured="False")
+    controller_configured = AddComponent.objects.filter(addtocontroller__configured="True")
+
     args = {
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components,
         'controller': comp_name,
-        'controller_objects': controller_objects
+        'controller_objects': controller_objects,
+        'controller_not_configured': controller_not_configured,
+        'controller_configured': controller_configured
     }
 
     return render(request, 'optimizer/configure_controller.html', args)

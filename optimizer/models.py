@@ -90,8 +90,8 @@ class CreateController(models.Model):
 
 class AddToController(models.Model):
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
-    controller = models.OneToOneField(CreateController, on_delete=models.CASCADE)
-    mode = models.CharField(max_length=2, choices=(('ss', 'Solar Support'), ('ab', 'Arbitrage'), ('ps', 'Peak Shaving')))
+    configured = models.BooleanField(default=False)
+    mode = models.CharField(max_length=2, choices=(('nc', 'Not Configured'), ('ss', 'Solar Support'), ('ab', 'Arbitrage'), ('ps', 'Peak Shaving')))
 
 class ComponentOutputs(models.Model):
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
