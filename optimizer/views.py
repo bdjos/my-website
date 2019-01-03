@@ -10,6 +10,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
+from django.views.generic import ListView, CreateView, UpdateView
+from django.urls import reverse_lazy
 from .models import *
 from .forms import *
 
@@ -306,10 +308,18 @@ def configure_controller(request, sys_id, comp_name):
     components = AddComponent.objects.filter(system_name=system)
 
     controller_objects = AddComponent.objects.filter(system_name=system, zone=1)
+
     controller_not_configured = AddComponent.objects.filter(addtocontroller__configured="False")
     controller_configured = AddComponent.objects.filter(addtocontroller__configured="True")
 
+    if request.method == "POST":
+        return redirect('add_component', sys_id)
+
+    else:
+        form = AddToControllerForm()
+
     args = {
+        'form': form,
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components,
@@ -319,7 +329,7 @@ def configure_controller(request, sys_id, comp_name):
         'controller_configured': controller_configured
     }
 
-    return render(request, 'optimizer/configure_controller.html', args)
+    return render(request, 'optimizer/configure_controller_opt.html', args)
 
 def add_to_controller(request, sys_id, controller, add_to_cont_name):
     system = CreateSystem.objects.get(pk=sys_id)
