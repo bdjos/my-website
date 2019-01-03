@@ -297,11 +297,13 @@ def configure_controller(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
 
+    controller_objects = AddComponent.objects.filter(system_name=system, zone=1)
     args = {
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components,
-        'controller': comp_name
+        'controller': comp_name,
+        'controller_objects': controller_objects
     }
 
     return render(request, 'optimizer/configure_controller.html', args)
