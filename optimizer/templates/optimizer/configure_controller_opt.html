@@ -22,16 +22,11 @@
         {% endfor %}
       </div>
       <div class="col-md-6">
-        {% for component in forms %}
-            {{ component.comp_type }} ({{ component }}) <br>
-        {% endfor %}
-      </div>
-      <div class="col-md-6">
         <form method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <label for="comp_input">Enter name: </label>
-          <input id="comp_input" type="" name="comp_field" value="Default name for team.">
-          <input type="submit" value="Save">
+            {% csrf_token %}
+            {% for form in forms %}
+              {{ form.mode }}
+            {% endfor %}
         </form>
       </div>
     </div>
