@@ -22,14 +22,13 @@
         {% endfor %}
       </div>
       <div class="col-md-6">
+        {% for component in forms %}
+            {{ component.comp_type }} ({{ component }}) <br>
+        {% endfor %}
+      </div>
+      <div class="col-md-6">
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
-          <select name="cars">
-            <option value="volvo">Volvo</option>
-            <option value="saab">Saab</option>
-            <option value="fiat">Fiat</option>
-            <option value="audi">Audi</option>
-          </select>
           <label for="comp_input">Enter name: </label>
           <input id="comp_input" type="" name="comp_field" value="Default name for team.">
           <input type="submit" value="Save">

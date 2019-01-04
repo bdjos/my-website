@@ -15,9 +15,11 @@ from django.urls import reverse_lazy
 from .models import *
 from .forms import *
 
+
 def index(request):
     components = AddComponent.objects.all()
     return render(request, 'optimizer/main.html', {'components': components})
+
 
 def run_model(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
@@ -28,6 +30,7 @@ def run_model(request, sys_id):
     args['components'] = components
     return render(request, 'optimizer/add_component.html', args)
 
+
 def add_component(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
@@ -37,6 +40,7 @@ def add_component(request, sys_id):
     args['components'] = components
     return render(request, 'optimizer/add_component.html', args)
 
+
 def view_system(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
@@ -45,6 +49,7 @@ def view_system(request, sys_id):
     args['system_name'] = system.system_name
     args['components'] = components
     return render(request, 'optimizer/view_system.html', args)
+
 
 def create_system(request):
     if request.method == "POST":
@@ -60,7 +65,8 @@ def create_system(request):
     args['create_form'] = create_form
     return render(request, 'optimizer/create_system.html', args)
 
-### Add Component Defs
+# Add Component Defs
+
 
 class ReturnErrors:
     @classmethod
@@ -70,6 +76,7 @@ class ReturnErrors:
                 component by selecting it from the system view in the sidebar and add
                 a new {comp_type}.
                 """
+
 
 class CreateData:
     """
@@ -138,8 +145,8 @@ class CreateData:
         add.save()
         return add
 
-def add_system_component(request, sys_id, comp_type):
 
+def add_system_component(request, sys_id, comp_type):
     comp_data = CreateData(sys_id, comp_type)
 
     args = comp_data.get_args()
@@ -184,6 +191,7 @@ def add_system_component(request, sys_id, comp_type):
     args['comp_type'] = comp_type
 
     return render(request, f'optimizer/add_system_component.html', args)
+
 
 # All view component views
 def view_component(request, sys_id, comp_name):
@@ -289,7 +297,7 @@ def view_component(request, sys_id, comp_name):
 
 
     if request.method =="POST":
-        return redirect('add_component')
+        return redirect('add_component', sys_id)
 
     args = {}
     args['sys_id'] = sys_id
@@ -306,28 +314,35 @@ def view_component(request, sys_id, comp_name):
 def configure_controller(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-
     controller_objects = AddComponent.objects.filter(system_name=system, zone=1)
 
     controller_not_configured = AddComponent.objects.filter(addtocontroller__configured="False")
     controller_configured = AddComponent.objects.filter(addtocontroller__configured="True")
 
+    forms = []
     if request.method == "POST":
-        return redirect('add_component', sys_id)
-
+        for controller_object in controller_objects:
+            form = AddToControllerForm(request.POST)
+            if form.is_valid():
+                create = form.save(False)
+                create.component = controller_object
+                create.configured = 'True'
+                create.save()
+            forms.append(AddToControllerForm(request.POST))
+        return redirect('add_component', sys_id=sys_id)
     else:
-        form = AddToControllerForm()
+        for controller_object in controller_objects:
+            forms.append(AddToControllerForm)
 
     args = {
-        'form': form,
+        'form': forms,
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components,
         'controller': comp_name,
         'controller_objects': controller_objects,
         'controller_not_configured': controller_not_configured,
-        'controller_configured': controller_configured
-    }
+        'controller_configured': controller_configured}
 
     return render(request, 'optimizer/configure_controller_opt.html', args)
 
