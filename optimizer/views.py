@@ -332,7 +332,8 @@ def configure_controller(request, sys_id, comp_name):
         return redirect('add_component', sys_id=sys_id)
     else:
         for controller_object in controller_objects:
-            forms.append(AddToControllerForm)
+            mode = controller_object.addtocontroller.mode
+            forms.append(AddToControllerForm(initial={'mode': mode}))
 
     args = {
         'form': forms,
