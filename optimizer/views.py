@@ -336,7 +336,7 @@ def configure_controller(request, sys_id, comp_name):
             forms.append(AddToControllerForm(initial={'mode': mode}))
 
     args = {
-        'form': forms,
+        'forms': forms,
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components,
