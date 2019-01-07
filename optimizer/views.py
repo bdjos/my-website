@@ -316,27 +316,32 @@ def configure_controller(request, sys_id, comp_name):
     components = AddComponent.objects.filter(system_name=system)
     controller_objects = AddComponent.objects.filter(system_name=system, zone=1)
 
+    operating_modes = {
+        'nc': 'Not Configured',
+        'ss': 'Solar Support',
+        'ab': 'Arbitrage',
+        'ps': 'Peak Shaving'
+    }
+
+    display_modes = {}
+    for component in controller_objects:
+        display_modes[component.comp_name] = operating_modes[component.addtocontroller.mode]
+
     controller_not_configured = AddComponent.objects.filter(addtocontroller__configured="False")
     controller_configured = AddComponent.objects.filter(addtocontroller__configured="True")
 
-    forms = []
     if request.method == "POST":
-        for controller_object in controller_objects:
-            form = AddToControllerForm(request.POST)
-            if form.is_valid():
-                create = form.save(False)
-                create.component = controller_object
-                create.configured = 'True'
-                create.save()
-            forms.append(AddToControllerForm(request.POST))
         return redirect('add_component', sys_id=sys_id)
-    else:
-        for controller_object in controller_objects:
-            mode = controller_object.addtocontroller.mode
-            forms.append(AddToControllerForm(initial={'mode': mode}))
+        # form = AddToControllerForm(request.POST)
+        # if form.is_valid():
+        #     create = form.save(False)
+        #     create.component = controller_object
+        #     create.configured = 'True'
+        #     create.save()
+        # return redirect('add_component', sys_id=sys_id)
 
     args = {
-        'forms': forms,
+        'display_modes': display_modes,
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components,
@@ -347,7 +352,7 @@ def configure_controller(request, sys_id, comp_name):
 
     return render(request, 'optimizer/configure_controller_opt.html', args)
 
-def add_to_controller(request, sys_id, controller, add_to_cont_name):
+def add_to_controller(request, sys_id, controller):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
     input_component = AddComponent.objects.get(comp_name=add_to_cont_name)

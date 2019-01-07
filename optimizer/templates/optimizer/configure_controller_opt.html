@@ -16,19 +16,18 @@
       <span>Components</span>
     </h6>
     <div class="row" style="margin-top:20px">
-      <div class="col-md-6">
-        {% for component in controller_objects %}
-            {{ component.comp_type }} ({{ component }}) <br>
-        {% endfor %}
-      </div>
-      <div class="col-md-6">
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {% for form in forms %}
-              {{ form.mode }}
-            {% endfor %}
-        </form>
-      </div>
+      {% for component in controller_objects %}
+        <div class="col-md-4">
+          {{ component.comp_type }} ({{ component }}) <br>
+        </div>
+        <div class="col-md-4">
+          {{ component.addtocontroller.mode }}  <br>
+        </div>
+        <div class="col-md-4">
+          <a class="btn btn-light" href="{% url 'add_to_controller' sys_id=sys_id comp_name=component.comp_name %}" role="button">Change</a>
+          <br>
+        </div>
+      {% endfor %}
     </div>
   </div>
 </div>
