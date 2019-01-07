@@ -316,17 +316,6 @@ def configure_controller(request, sys_id, comp_name):
     components = AddComponent.objects.filter(system_name=system)
     controller_objects = AddComponent.objects.filter(system_name=system, zone=1)
 
-    operating_modes = {
-        'nc': 'Not Configured',
-        'ss': 'Solar Support',
-        'ab': 'Arbitrage',
-        'ps': 'Peak Shaving'
-    }
-
-    display_modes = {}
-    for component in controller_objects:
-        display_modes[component.comp_name] = operating_modes[component.addtocontroller.mode]
-
     controller_not_configured = AddComponent.objects.filter(addtocontroller__configured="False")
     controller_configured = AddComponent.objects.filter(addtocontroller__configured="True")
 
@@ -341,7 +330,6 @@ def configure_controller(request, sys_id, comp_name):
         # return redirect('add_component', sys_id=sys_id)
 
     args = {
-        'display_modes': display_modes,
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components,
@@ -352,35 +340,29 @@ def configure_controller(request, sys_id, comp_name):
 
     return render(request, 'optimizer/configure_controller_opt.html', args)
 
-def add_to_controller(request, sys_id, controller):
+def add_to_controller(request, sys_id, comp_name, controller):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-    input_component = AddComponent.objects.get(comp_name=add_to_cont_name)
+    input_component = AddComponent.objects.get(comp_name=comp_name)
 
     if request.method == "POST":
-        if input_component.comp_type == 'battery':
-            add_form = AddToControllerForm(request.POST)
-            if add_form.is_valid():
-                add = add_form.save(False)
-                add.component = input_component
-                add.save()
-                return redirect('view_component', sys_id=sys_id, comp_name=comp_name)
+        add_form = AddToControllerForm(request.POST)
+        if add_form.is_valid():
+            add = add_form.save(False)
+            add.component = input_component
+            add.configured = True
+            add.save()
+            return redirect('view_component', sys_id=sys_id, comp_name=comp_name)
 
     else:
-        ## Here add if statements for different types of components
-        if input_component.comp_type=='battery':
-            add_form = AddToControllerForm()
-        elif input_component.comp_type=='converter':
-            converter = AddToController(component=AddComponent.input_component,
-                                        mode='ss')
-            return redirect('view_component', sys_id=sys_id, comp_name=comp_name)
+        add_form = AddToControllerForm()
     #
     args = {}
+    args['sys_id'] = sys_id
     args['components'] = components
-    args['controller'] = controller
     args['input_component'] = input_component
     args['add_form'] = add_form
-    return render(request, 'optimizer/configure_controller.html', args)
+    return render(request, 'optimizer/add_to_controller.html', args)
     # return render(request, 'optimizer/configure_controller.html', args)
 
 
