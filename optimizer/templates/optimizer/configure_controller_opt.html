@@ -12,9 +12,18 @@
 </div>
 <div class="row" style="padding-left:50px">
   <div class="col-md-6">
-    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-      <span>Components</span>
-    </h6>
+    <div class="row" style="margin-top:10px">
+      <div class="col-md-4">
+        <h6 class="sidebar-heading d-flex px-3 mt-4 mb-1 text-muted">
+          <span>Components</span>
+        </h6>
+      </div>
+      <div class="col-md-4">
+        <h6 class="sidebar-heading d-flex px-3 mt-4 mb-1 text-muted">
+          <span>Configuration</span>
+        </h6>
+      </div>
+    </div>
     <div class="row" style="margin-top:20px">
       {% for component in controller_objects %}
         <div class="col-md-4">
@@ -24,7 +33,7 @@
           {{ component.addtocontroller.mode }}  <br>
         </div>
         <div class="col-md-4">
-          <a class="btn btn-light" href="{% url 'add_to_controller' sys_id=sys_id comp_name=component.comp_name %}" role="button">Change</a>
+          <a class="btn btn-light" href="{% url 'add_to_controller' sys_id=sys_id comp_name=component.comp_name controller=controller%}" role="button">Change</a>
           <br>
         </div>
       {% endfor %}

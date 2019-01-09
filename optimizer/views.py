@@ -1,6 +1,7 @@
 import csv, io
 import os
 import sys
+
 sys.path.insert(0, os.path.join('..', 'pv-optimizer'))
 from mgridoptimizer.modules import mgrid_model
 import plotly.plotly as py
@@ -14,58 +15,6 @@ from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
 from .models import *
 from .forms import *
-
-
-def index(request):
-    components = AddComponent.objects.all()
-    return render(request, 'optimizer/main.html', {'components': components})
-
-
-def run_model(request, sys_id):
-    system = CreateSystem.objects.get(pk=sys_id)
-    components = AddComponent.objects.filter(system_name=system)
-    args = {}
-    args['sys_id'] = sys_id
-    args['system_name'] = system.system_name
-    args['components'] = components
-    return render(request, 'optimizer/add_component.html', args)
-
-
-def add_component(request, sys_id):
-    system = CreateSystem.objects.get(pk=sys_id)
-    components = AddComponent.objects.filter(system_name=system)
-    args = {}
-    args['sys_id'] = sys_id
-    args['system_name'] = system.system_name
-    args['components'] = components
-    return render(request, 'optimizer/add_component.html', args)
-
-
-def view_system(request, sys_id):
-    system = CreateSystem.objects.get(pk=sys_id)
-    components = AddComponent.objects.filter(system_name=system)
-    args = {}
-    args['sys_id'] = sys_id
-    args['system_name'] = system.system_name
-    args['components'] = components
-    return render(request, 'optimizer/view_system.html', args)
-
-
-def create_system(request):
-    if request.method == "POST":
-        create_form = CreateSystemForm(request.POST)
-        if create_form.is_valid():
-            create = create_form.save()
-            create.sys_id=create.pk
-            return redirect('add_component', sys_id=create.sys_id)
-    else:
-        create_form = CreateSystemForm()
-
-    args ={}
-    args['create_form'] = create_form
-    return render(request, 'optimizer/create_system.html', args)
-
-# Add Component Defs
 
 
 class ReturnErrors:
@@ -95,7 +44,7 @@ class CreateData:
             'converter': {'single_comp': 1, 'zone': 1, 'create_data': None},
             'controller': {'single_comp': 1, 'zone': 2, 'create_data': None},
             'grid': {'single_comp': 1, 'zone': 3, 'create_data': None},
-            }
+        }
         self.comp_single = self.comp_data[self.comp_type]['single_comp']
         self.comp_zone = self.comp_data[self.comp_type]['zone']
         self.components = AddComponent.objects.filter(system_name=self.system)
@@ -122,7 +71,7 @@ class CreateData:
 
     def demand_data(self, demand_file):
         path = os.path.join('media', str(demand_file))
-        y =[]
+        y = []
         with open(path, 'r') as file:
             reader = csv.reader(file, delimiter=',')
             for val in reader:
@@ -136,14 +85,92 @@ class CreateData:
 
     def add_component(self):
         add = AddComponent(
-                system_name=self.system,
-                comp_name=self.comp_name,
-                comp_type=self.comp_type,
-                comp_num=self.comp_num,
-                zone=self.comp_data[self.comp_type]['zone']
+            system_name=self.system,
+            comp_name=self.comp_name,
+            comp_type=self.comp_type,
+            comp_num=self.comp_num,
+            zone=self.comp_data[self.comp_type]['zone']
         )
         add.save()
         return add
+
+
+def index(request):
+    components = AddComponent.objects.all()
+    return render(request, 'optimizer/main.html', {'components': components})
+
+
+def run_model(request, sys_id):
+    system = CreateSystem.objects.get(pk=sys_id)
+    components = AddComponent.objects.filter(system_name=system)
+
+    if request.method == "POST":
+        return redirect('add_system_component', sys_id)
+
+    else:
+        ## INPUT JSON INTO MODEL AND RUN
+        return None
+
+    args = {
+        'sys_id': sys_id,
+        'system_name': system.system_name,
+        'components': components
+    }
+
+    return render(request, 'optimizer/add_component.html', args)
+
+
+def add_component(request, sys_id):
+    system = CreateSystem.objects.get(pk=sys_id)
+    components = AddComponent.objects.filter(system_name=system)
+    args = {}
+    args['sys_id'] = sys_id
+    args['system_name'] = system.system_name
+    args['components'] = components
+    return render(request, 'optimizer/add_component.html', args)
+
+
+def view_system(request, sys_id):
+    system = CreateSystem.objects.get(pk=sys_id)
+    components = AddComponent.objects.filter(system_name=system)
+    system_name = system.system_name
+    component_values = components.values()
+
+    # Build Output Dictionary
+    system_output = {}
+    component_output = {}
+    for component in component_values:
+        comp_name = component.pop('comp_name')
+        component_output[comp_name] = component
+        # component_output[component['comp_name']] = component
+
+    system_output['component'] = component_output
+
+    if request.method == 'POST':
+        return redirect('add_system_component', sys_id)
+
+    args = {
+        'sys_id': sys_id,
+        'system_name': system_name,
+        'system_output': system_output,
+    }
+
+    return render(request, 'optimizer/view_system.html', args)
+
+
+def create_system(request):
+    if request.method == "POST":
+        create_form = CreateSystemForm(request.POST)
+        if create_form.is_valid():
+            create = create_form.save()
+            create.sys_id = create.pk
+            return redirect('add_component', sys_id=create.sys_id)
+    else:
+        create_form = CreateSystemForm()
+
+    args = {}
+    args['create_form'] = create_form
+    return render(request, 'optimizer/create_system.html', args)
 
 
 def add_system_component(request, sys_id, comp_type):
@@ -157,7 +184,7 @@ def add_system_component(request, sys_id, comp_type):
         if create_form.is_valid():
             add = comp_data.add_component()
 
-            create = create_form.save(False) # Create Component object
+            create = create_form.save(False)  # Create Component object
             create.component = add
             create.save()
 
@@ -166,10 +193,10 @@ def add_system_component(request, sys_id, comp_type):
                 create.data = comp_data.demand_data(create.demand_file)
             elif comp_type == 'solar':
                 create.data = comp_data.solar_data(
-                                                create.system_capacity,
-                                                create.base_cost,
-                                                create.perw_cost
-                                                )
+                    create.system_capacity,
+                    create.base_cost,
+                    create.perw_cost
+                )
             create.save()
 
             # Add to controller table if components are in zone 1
@@ -193,7 +220,6 @@ def add_system_component(request, sys_id, comp_type):
     return render(request, f'optimizer/add_system_component.html', args)
 
 
-# All view component views
 def view_component(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
@@ -265,7 +291,7 @@ def view_component(request, sys_id, comp_name):
             qryset_list.append((key, input_component_values[key]))
 
     # If demand or solar generate graph data
-    html = None # Blank html for non solar or demand objects
+    html = None  # Blank html for non solar or demand objects
     if input_component_type == 'demand' or input_component_type == 'solar':
         y = model_info[input_component_type]['model'].objects.get(
             component__system_name=system,
@@ -274,7 +300,7 @@ def view_component(request, sys_id, comp_name):
         y = y.split(',')
 
         x = list(range(len(y)))
-        trace1 = go.Scatter({'x':x, 'y':y})
+        trace1 = go.Scatter({'x': x, 'y': y})
         data = [trace1]
         layout = go.Layout(
             xaxis=dict(
@@ -293,10 +319,10 @@ def view_component(request, sys_id, comp_name):
             )
         )
 
-        html = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div', link_text='')
+        html = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
+                                   link_text='')
 
-
-    if request.method =="POST":
+    if request.method == "POST":
         return redirect('add_component', sys_id)
 
     args = {}
@@ -311,6 +337,7 @@ def view_component(request, sys_id, comp_name):
     args['html'] = html
     return render(request, f'optimizer/view_component.html', args)
 
+
 def configure_controller(request, sys_id, comp_name):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
@@ -321,13 +348,6 @@ def configure_controller(request, sys_id, comp_name):
 
     if request.method == "POST":
         return redirect('add_component', sys_id=sys_id)
-        # form = AddToControllerForm(request.POST)
-        # if form.is_valid():
-        #     create = form.save(False)
-        #     create.component = controller_object
-        #     create.configured = 'True'
-        #     create.save()
-        # return redirect('add_component', sys_id=sys_id)
 
     args = {
         'sys_id': sys_id,
@@ -340,10 +360,11 @@ def configure_controller(request, sys_id, comp_name):
 
     return render(request, 'optimizer/configure_controller_opt.html', args)
 
+
 def add_to_controller(request, sys_id, comp_name, controller):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-    input_component = AddComponent.objects.get(comp_name=comp_name)
+    input_component = AddComponent.objects.get(system_name=system, comp_name=comp_name)
 
     if request.method == "POST":
         add_form = AddToControllerForm(request.POST)
@@ -352,13 +373,14 @@ def add_to_controller(request, sys_id, comp_name, controller):
             add.component = input_component
             add.configured = True
             add.save()
-            return redirect('view_component', sys_id=sys_id, comp_name=comp_name)
+            return redirect('configure_controller', sys_id=sys_id, comp_name=controller)
 
     else:
         add_form = AddToControllerForm()
     #
     args = {}
     args['sys_id'] = sys_id
+    args['system_name'] = system.system_name
     args['components'] = components
     args['input_component'] = input_component
     args['add_form'] = add_form
