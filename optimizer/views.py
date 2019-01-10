@@ -3,10 +3,12 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join('..', 'pv-optimizer'))
+from mgridoptimizer import api_test
 from mgridoptimizer.modules import mgrid_model
 import plotly.plotly as py
 import plotly.graph_objs as go
 import plotly.offline
+import json
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
@@ -104,20 +106,49 @@ def run_model(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
 
+    data = api_test.test_api()
+
+    y = []
+    trace = []
+    for component in data['components']:
+        output = data['components'][component]['output']['demand']
+        if output:
+            y.append(output)
+            x = list(range(len(output)))
+            trace.append(go.Scatter({'x': x, 'y': output, 'name': component}))
+
+    data = trace
+    layout = go.Layout(
+        xaxis=dict(
+            title='Hour',
+            titlefont=dict(
+                size=18,
+                color='#7f7f7f'
+            )
+        ),
+        yaxis=dict(
+            title='kW',
+            titlefont=dict(
+                size=18,
+                color='#7f7f7f'
+            )
+        )
+    )
+
+    html = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
+                               link_text='')
+
     if request.method == "POST":
         return redirect('add_system_component', sys_id)
 
-    else:
-        ## INPUT JSON INTO MODEL AND RUN
-        return None
-
     args = {
+        'html': html,
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components
     }
 
-    return render(request, 'optimizer/add_component.html', args)
+    return render(request, 'optimizer/run_model.html', args)
 
 
 def add_component(request, sys_id):
