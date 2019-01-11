@@ -9,8 +9,21 @@
   </div>
 </div>
 
-{% if html != None %}
-  {% include 'optimizer/includes/incplotly.html' %}
+{% if html_demand != None %}
+<div class="row">
+  <div class="col-md-11">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  {{ html_demand|safe }}
+  </div>
+</div>
+{% endif %}
+{% if html_bat != None %}
+<div class="row">
+  <div class="col-md-11">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  {{ html_bat|safe }}
+  </div>
+</div>
 {% endif %}
 
 {% endblock %}

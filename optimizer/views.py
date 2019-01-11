@@ -106,12 +106,13 @@ def run_model(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
 
-    data = api_test.test_api()
+    output_data = api_test.test_api()
 
+    #
     y = []
     trace = []
-    for component in data['components']:
-        output = data['components'][component]['output']['demand']
+    for component in output_data['components']:
+        output = output_data['components'][component]['output']['demand']
         if output:
             y.append(output)
             x = list(range(len(output)))
@@ -135,14 +136,46 @@ def run_model(request, sys_id):
         )
     )
 
-    html = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
+    html_demand = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
+                               link_text='')
+
+    y = []
+    trace = []
+    for component in output_data['components']:
+        if output_data['components'][component]['comp_type'] == 'battery':
+            output = output_data['components'][component]['output']['soc']
+            if output:
+                y.append(output)
+                x = list(range(len(output)))
+                trace.append(go.Scatter({'x': x, 'y': output, 'name': component}))
+
+    data = trace
+    layout = go.Layout(
+        xaxis=dict(
+            title='Hour',
+            titlefont=dict(
+                size=18,
+                color='#7f7f7f'
+            )
+        ),
+        yaxis=dict(
+            title='soc',
+            titlefont=dict(
+                size=18,
+                color='#7f7f7f'
+            )
+        )
+    )
+
+    html_bat = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
                                link_text='')
 
     if request.method == "POST":
         return redirect('add_system_component', sys_id)
 
     args = {
-        'html': html,
+        'html_demand': html_demand,
+        'html_bat': html_bat,
         'sys_id': sys_id,
         'system_name': system.system_name,
         'components': components
