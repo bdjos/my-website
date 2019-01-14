@@ -10,6 +10,7 @@ import plotly.graph_objs as go
 import plotly.offline
 import json
 from django.shortcuts import render, redirect
+from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
@@ -206,9 +207,34 @@ def view_system(request, sys_id):
     for component in component_values:
         comp_name = component.pop('comp_name')
         component_output[comp_name] = component
-        # component_output[component['comp_name']] = component
 
-    system_output['component'] = component_output
+    system_output['components'] = component_output
+
+    # Create mapping for component inputs and controller configures
+    component_mapping = {
+        'demand': CreateDemand,
+        'solar': CreateSolar,
+        'battery': CreateBattery,
+        'generator': CreateGenerator,
+        'converter': CreateConverter,
+        'controller': CreateController,
+        'grid': CreateGrid
+    }
+
+    # Map component to CreateObject model, get all input info and add to system output dict
+    for component in components:
+        component_inputs = component_mapping[component.comp_type].objects.filter(component=component).values()[0]
+        controller_configs = AddToController.objects.filter(component=component).values()
+        if controller_configs:
+            controller_configs = controller_configs[0]
+        else:
+            controller_configs = {}
+
+        system_output['components'][component.comp_name]['input'] = component_inputs
+        system_output['components'][component.comp_name]['configure'] = controller_configs
+
+    # Get all controller config info and add to system output dict
+
 
     if request.method == 'POST':
         return redirect('add_system_component', sys_id)
