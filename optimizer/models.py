@@ -13,6 +13,7 @@ from django.conf import settings
 class CreateSystem(models.Model):
     system_name = models.CharField(max_length=32)
     created_at = models.DateTimeField(auto_now_add=True)
+    system_output = models.TextField()
 
     def __str__(self):
         return self.system_name

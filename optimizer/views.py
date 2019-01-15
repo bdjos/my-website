@@ -223,18 +223,26 @@ def view_system(request, sys_id):
 
     # Map component to CreateObject model, get all input info and add to system output dict
     for component in components:
+        # Get all component inputs
         component_inputs = component_mapping[component.comp_type].objects.filter(component=component).values()[0]
+        # Get all controller config info
         controller_configs = AddToController.objects.filter(component=component).values()
-        if controller_configs:
+        if controller_configs: # If object is configured to controller, get configs
             controller_configs = controller_configs[0]
         else:
             controller_configs = {}
 
+        # Add component inputs and controller configurations to system output
         system_output['components'][component.comp_name]['input'] = component_inputs
         system_output['components'][component.comp_name]['configure'] = controller_configs
 
-    # Get all controller config info and add to system output dict
 
+    api_input = json.dump(system_output) # Dump dict to JSON
+
+    api_output = api_test.api_sim(api_input, api_test.test_file) # Run api
+
+    system.system_output = api_output # Save API output to system
+    system.save()
 
     if request.method == 'POST':
         return redirect('add_system_component', sys_id)
