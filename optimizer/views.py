@@ -83,7 +83,7 @@ class CreateData:
 
     def solar_data(self, *args):
         system_capacity, base_cost, perw_cost = args
-        solar_object = mgrid_model.solar.run_api(system_capacity, base_cost, perw_cost)
+        solar_object = mgrid_model.Solar.run_api(system_capacity, base_cost, perw_cost)
         return solar_object.json_demand
 
     def add_component(self):
@@ -225,10 +225,12 @@ def view_system(request, sys_id):
     for component in components:
         # Get all component inputs
         component_inputs = component_mapping[component.comp_type].objects.filter(component=component).values()[0]
+        component_inputs.pop('component_id')
         # Get all controller config info
         controller_configs = AddToController.objects.filter(component=component).values()
         if controller_configs: # If object is configured to controller, get configs
             controller_configs = controller_configs[0]
+            controller_configs.pop('component_id') # Remove component id reference
         else:
             controller_configs = {}
 
@@ -237,7 +239,7 @@ def view_system(request, sys_id):
         system_output['components'][component.comp_name]['configure'] = controller_configs
 
 
-    api_input = json.dump(system_output) # Dump dict to JSON
+    api_input = json.dumps(system_output) # Dump dict to JSON
 
     api_output = api_test.api_sim(api_input, api_test.test_file) # Run api
 

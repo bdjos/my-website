@@ -58,7 +58,8 @@ class CreateBattery(models.Model):
     soc_max = models.IntegerField()
     base_cost = models.FloatField()
     energy_cost = models.FloatField()
-    controller_configured = models.BooleanField(default=False)
+    efficiency = models.FloatField()
+    # controller_configured = models.BooleanField(default=False)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
 
     def __str__(self):
@@ -69,7 +70,7 @@ class CreateConverter(models.Model):
     power = models.IntegerField()
     base_cost = models.FloatField()
     power_cost = models.FloatField()
-    controller_configured = models.BooleanField(default=False)
+    # controller_configured = models.BooleanField(default=False)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
 
     def __str__(self):
@@ -80,7 +81,7 @@ class CreateGenerator(models.Model):
     power = models.IntegerField()
     base_cost = models.FloatField()
     fuel_cost = models.FloatField()
-    controller_configured = models.BooleanField(default=False)
+    # controller_configured = models.BooleanField(default=False)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
         return str(self.component)

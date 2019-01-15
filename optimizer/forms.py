@@ -10,8 +10,8 @@ def create_component_form(comp_type):
     models = {
             'system': {'model': CreateSystem, 'fields': ('system_name',)},
             'demand': {'model': CreateDemand, 'fields': ('demand_file',)},
-            'battery': {'model': CreateBattery, 'fields': ('energy_capacity', 'soc_min', 'soc_max', 'base_cost',
-                                                           'energy_cost',)},
+            'battery': {'model': CreateBattery, 'fields': ('energy_capacity', 'soc_min', 'soc_max', 'efficiency',
+                                                           'base_cost', 'energy_cost')},
             'solar': {'model': CreateSolar, 'fields': ('system_capacity', 'base_cost', 'perw_cost')},
             'generator': {'model': CreateGenerator, 'fields': ('power', 'base_cost', 'fuel_cost')},
             'converter': {'model': CreateConverter, 'fields': ('power', 'base_cost', 'power_cost')},
