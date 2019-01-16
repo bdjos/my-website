@@ -45,8 +45,8 @@ class CreateData:
             'solar': {'single_comp': 1, 'zone': 0, 'create_data': self.solar_data},
             'generator': {'single_comp': 1, 'zone': 1, 'create_data': None},
             'converter': {'single_comp': 1, 'zone': 1, 'create_data': None},
-            'controller': {'single_comp': 1, 'zone': 2, 'create_data': None},
-            'grid': {'single_comp': 1, 'zone': 3, 'create_data': None},
+            'controller': {'single_comp': 1, 'zone': 1, 'create_data': None},
+            'grid': {'single_comp': 1, 'zone': 2, 'create_data': None},
         }
         self.comp_single = self.comp_data[self.comp_type]['single_comp']
         self.comp_zone = self.comp_data[self.comp_type]['zone']
@@ -107,7 +107,7 @@ def run_model(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
 
-    output_data = api_test.test_api()
+    output_data = json.loads(system.system_output)
 
     #
     y = []
@@ -226,11 +226,14 @@ def view_system(request, sys_id):
         # Get all component inputs
         component_inputs = component_mapping[component.comp_type].objects.filter(component=component).values()[0]
         component_inputs.pop('component_id')
+        if component.comp_type == 'demand' or component.comp_type == 'solar':
+            component_inputs.pop('data')
         # Get all controller config info
         controller_configs = AddToController.objects.filter(component=component).values()
         if controller_configs: # If object is configured to controller, get configs
             controller_configs = controller_configs[0]
             controller_configs.pop('component_id') # Remove component id reference
+
         else:
             controller_configs = {}
 
@@ -243,7 +246,7 @@ def view_system(request, sys_id):
 
     api_output = api_test.api_sim(api_input, api_test.test_file) # Run api
 
-    system.system_output = api_output # Save API output to system
+    system.system_output = json.dumps(api_output) # Save API output to system as string
     system.save()
 
     if request.method == 'POST':
@@ -252,7 +255,7 @@ def view_system(request, sys_id):
     args = {
         'sys_id': sys_id,
         'system_name': system_name,
-        'system_output': system_output,
+        'system_output': system.system_output,
     }
 
     return render(request, 'optimizer/view_system.html', args)
@@ -290,7 +293,7 @@ def add_system_component(request, sys_id, comp_type):
 
             # Generate graph data if components are demand or solar
             if comp_type == 'demand':
-                create.data = comp_data.demand_data(create.demand_file)
+                create.data = comp_data.demand_data(create.file)
             elif comp_type == 'solar':
                 create.data = comp_data.solar_data(
                     create.system_capacity,

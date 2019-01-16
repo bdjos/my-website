@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, connection
 from django.conf import settings
+import os
 
 
 #def drop_table(table_name):
@@ -31,8 +32,7 @@ class AddComponent(models.Model):
 
 
 class CreateDemand(models.Model):
-    demand_file = models.FileField(upload_to='documents/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to=os.path.join(os.path.dirname(__file__), '../', 'media/', 'documents/'))
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     data = models.TextField()
 
@@ -44,7 +44,7 @@ class CreateSolar(models.Model):
     system_capacity = models.IntegerField()
     base_cost = models.FloatField()
     perw_cost = models.FloatField()
-    demand_file = models.FileField(upload_to='documents/')
+    # demand_file = models.FileField(upload_to='documents/')
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     data = models.TextField()
 
@@ -97,6 +97,7 @@ class CreateGrid(models.Model):
 
 class CreateController(models.Model):
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
+    active = models.BooleanField(default=True)
     def __str__(self):
         return str(self.component)
 
