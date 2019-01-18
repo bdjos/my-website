@@ -226,8 +226,12 @@ def view_system(request, sys_id):
         # Get all component inputs
         component_inputs = component_mapping[component.comp_type].objects.filter(component=component).values()[0]
         component_inputs.pop('component_id')
+        # Pop data from demand and solar
         if component.comp_type == 'demand' or component.comp_type == 'solar':
             component_inputs.pop('data')
+        # Convert demand filepath to absolute path
+        if component.comp_type == 'demand':
+            component_inputs['file'] = CreateDemand.objects.get(component=component).file.path
         # Get all controller config info
         controller_configs = AddToController.objects.filter(component=component).values()
         if controller_configs: # If object is configured to controller, get configs
@@ -252,10 +256,13 @@ def view_system(request, sys_id):
     if request.method == 'POST':
         return redirect('add_system_component', sys_id)
 
+    dem_file = CreateDemand.objects.get(component=AddComponent.objects.get(system_name=system, comp_name='dmn1')).file
+
     args = {
+        'dem_file': dem_file,
         'sys_id': sys_id,
         'system_name': system_name,
-        'system_output': system.system_output,
+        'system_output': system_output,
     }
 
     return render(request, 'optimizer/view_system.html', args)
