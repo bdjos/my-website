@@ -32,7 +32,7 @@ class AddComponent(models.Model):
 
 
 class CreateDemand(models.Model):
-    file = models.FileField(upload_to='documents/')
+    file = models.FileField(upload_to='documents/', blank=True)
     component = models.OneToOneField(AddComponent, on_delete=models.CASCADE, primary_key=True)
     data = models.TextField()
 

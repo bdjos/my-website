@@ -1,0 +1,37 @@
+{% extends "optimizer/index.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>Add {{comp_type}}</h2>
+<form method="POST" enctype="multipart/form-data">
+    <input type="radio" name="choice_field" value="upload" checked />
+    <ul>
+        Upload one year of 15 minute interval data (CSV file of 35040 kW values)
+        {% csrf_token %}
+        {{ create_form|crispy }}
+    </ul>
+    <input type="radio" name="choice_field" value="test" />
+    <ul>
+        Use test demand data
+    </ul>
+    {% if return_error != None %}
+    <button type="button"
+            class="btn btn-secondary popover-dismiss"
+            data-container="body"
+            data-toggle="popover"
+            data-placement="right"
+            data-content="{{ return_error }}">
+    Submit
+    </button>
+    <script>
+      $('.popover-dismiss').popover({
+      trigger: 'focus'
+      });
+    </script>
+  {% else %}
+    <button type="submit">Upload</button>
+  {% endif %}
+</form>
+
+{% endblock %}

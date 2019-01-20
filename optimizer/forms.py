@@ -37,3 +37,9 @@ class AddToControllerForm(forms.ModelForm):
     class Meta:
         model = AddToController
         fields = ('mode',)
+
+
+class CreateDemandForm(forms.ModelForm):
+    class Meta:
+        model = CreateDemand
+        fields = ('file',)

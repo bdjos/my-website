@@ -3,13 +3,14 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join('..', 'pv-optimizer'))
-from mgridoptimizer import api_test
+from mgridoptimizer import api_test, data
 from mgridoptimizer.modules import mgrid_model
 import plotly.plotly as py
 import plotly.graph_objs as go
 import plotly.offline
 import json
 from django.shortcuts import render, redirect
+from django.core.files import File
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from django.contrib import messages
@@ -40,7 +41,7 @@ class CreateData:
         self.comp_type = comp_type
         self.system = CreateSystem.objects.get(pk=self.sys_id)
         self.comp_data = {
-            'demand': {'single_comp': 1, 'zone': 0, 'create_data': self.demand_data},
+            'demand': {'single_comp': 1, 'zone': 0, 'create_data': self.demand_data_from_file},
             'battery': {'single_comp': 0, 'zone': 1, 'create_data': None},
             'solar': {'single_comp': 1, 'zone': 0, 'create_data': self.solar_data},
             'generator': {'single_comp': 1, 'zone': 1, 'create_data': None},
@@ -72,14 +73,22 @@ class CreateData:
         args['components'] = self.components
         return args
 
-    def demand_data(self, demand_file):
-        path = os.path.join('media', str(demand_file))
+    def demand_data_from_file(self, demand_file):
         y = []
-        with open(path, 'r') as file:
-            reader = csv.reader(file, delimiter=',')
-            for val in reader:
-                y.append(val[0])
+        demand_file = demand_file.open(mode='r')
+        reader = csv.reader(demand_file, delimiter=',')
+        for val in reader:
+            y.append(val[0])
         return str(y)
+
+    # def demand_data(self, demand_file):
+    #     path = os.path.join('media', str(demand_file))
+    #     y = []
+    #     with open(path, 'r') as file:
+    #         reader = csv.reader(file, delimiter=',')
+    #         for val in reader:
+    #             y.append(val[0])
+    #     return str(y)
 
     def solar_data(self, *args):
         system_capacity, base_cost, perw_cost = args
@@ -299,9 +308,9 @@ def add_system_component(request, sys_id, comp_type):
             create.save()
 
             # Generate graph data if components are demand or solar
-            if comp_type == 'demand':
-                create.data = comp_data.demand_data(create.file)
-            elif comp_type == 'solar':
+            # if comp_type == 'demand':
+            #     create.data = comp_data.demand_data(create.file)
+            if comp_type == 'solar':
                 create.data = comp_data.solar_data(
                     create.system_capacity,
                     create.base_cost,
@@ -328,6 +337,63 @@ def add_system_component(request, sys_id, comp_type):
     args['comp_type'] = comp_type
 
     return render(request, f'optimizer/add_system_component.html', args)
+
+
+def add_demand(request, sys_id, comp_type):
+    comp_data = CreateData(sys_id, comp_type)
+
+    args = comp_data.get_args()
+    return_error = None
+
+    if request.method == "POST":
+        add = comp_data.add_component()
+        if request.POST['choice_field'] == 'upload':
+            create_form = CreateDemandForm(request.POST, request.FILES)
+            if create_form.is_valid():
+                create = create_form.save(False)  # Create Component object
+                create.component = add
+                create.save()
+                create.data = comp_data.demand_data_from_file(create.file)
+                create.save()
+
+            return redirect('add_component', sys_id)
+
+        elif request.POST['choice_field'] == 'test':
+            test_name = 'test_data.csv' # Test file name
+            # File located in mgridoptimizer.data dir
+            test_file = os.path.join(os.path.dirname(data.__file__), test_name)
+            test_file = open(test_file)
+            django_file = File(test_file, name=test_name) # Open file in Django's File filetype
+            CreateDemand(
+                    component=add,
+                    file=django_file,
+                    data=comp_data.demand_data_from_file(django_file)
+                    ).save()
+            test_file.close()
+
+            return redirect('add_component', sys_id)
+
+                # Generate graph data
+                # create.data = comp_data.demand_data(create.file)
+                # create.save()
+                #
+                # return redirect('add_component', sys_id)
+
+        else:
+            return redirect('add_component', sys_id)
+
+    else:
+        if comp_data.comp_num > 1 & comp_data.comp_single == 1:
+            return_error = ReturnErrors.single_component(comp_type)
+        else:
+            return_error = None
+        create_form = create_component_form(comp_type)()
+
+    args['return_error'] = return_error
+    args['create_form'] = create_form
+    args['comp_type'] = comp_type
+
+    return render(request, f'optimizer/add_demand.html', args)
 
 
 def view_component(request, sys_id, comp_name):

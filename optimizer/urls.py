@@ -11,6 +11,7 @@ urlpatterns = [
     path('sys_id_<str:sys_id>/run_model/', views.run_model, name='run_model'),
     path('sys_id_<str:sys_id>/add_component/add_<str:comp_type>/', views.add_system_component,
          name='add_system_component'),
+    path('sys_id_<str:sys_id>/add_demand/add_<str:comp_type>/', views.add_demand, name='add_demand'),
     path('sys_id_<str:sys_id>/view_component/<str:comp_name>/', views.view_component, name='view_component'),
     path('sys_id_<str:sys_id>/view_component/<str:comp_name>/configure_controller/', views.configure_controller,
          name='configure_controller'),

@@ -10,7 +10,7 @@
 </div>
 <div class="row" style="padding-left:50px">
   <div class="list-group col-md-5">
-    <a href="{% url 'add_system_component' sys_id=sys_id comp_type='demand' %}" class="list-group-item list-group-item-action">Demand Profile</a>
+    <a href="{% url 'add_demand' sys_id=sys_id comp_type='demand' %}" class="list-group-item list-group-item-action">Demand Profile</a>
     <a href="{% url 'add_system_component' sys_id=sys_id comp_type='battery' %}" class="list-group-item list-group-item-action">Battery</a>
     <a href="{% url 'add_system_component' sys_id=sys_id comp_type='solar' %}" class="list-group-item list-group-item-action">Solar</a>
     <a href="{% url 'add_system_component' sys_id=sys_id comp_type='converter' %}" class="list-group-item list-group-item-action">Converter</a>
