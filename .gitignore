@@ -7,6 +7,8 @@ myprojectenv
 db.sqlite3
 /static
 .DS_Store
+/settings.py
+mywebsite/settings.py
 settings.py
 solar-optimizer
 pvoptimizer
