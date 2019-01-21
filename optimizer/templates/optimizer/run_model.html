@@ -9,6 +9,13 @@
   </div>
 </div>
 
+{% if run_model_err != None %}
+<div class="row">
+  <div class="col-md-11">
+  {{ run_model_err }}
+  </div>
+</div>
+{% endif %}
 {% if html_demand != None %}
 <div class="row">
   <div class="col-md-11">

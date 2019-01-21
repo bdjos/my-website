@@ -112,78 +112,85 @@ def index(request):
     return render(request, 'optimizer/main.html', {'components': components})
 
 
-def run_model(request, sys_id):
+def view_system(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
-
-    output_data = json.loads(system.system_output)
-
-    #
-    y = []
-    trace = []
-    for component in output_data['components']:
-        output = output_data['components'][component]['output']['demand']
-        if output:
-            y.append(output)
-            x = list(range(len(output)))
-            trace.append(go.Scatter({'x': x, 'y': output, 'name': component}))
-
-    data = trace
-    layout = go.Layout(
-        xaxis=dict(
-            title='Hour',
-            titlefont=dict(
-                size=18,
-                color='#7f7f7f'
-            )
-        ),
-        yaxis=dict(
-            title='kW',
-            titlefont=dict(
-                size=18,
-                color='#7f7f7f'
-            )
-        )
-    )
-
-    html_demand = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
-                               link_text='')
-
-    y = []
-    trace = []
-    for component in output_data['components']:
-        if output_data['components'][component]['comp_type'] == 'battery':
-            output = output_data['components'][component]['output']['soc']
-            if output:
-                y.append(output)
-                x = list(range(len(output)))
-                trace.append(go.Scatter({'x': x, 'y': output, 'name': component}))
-
-    data = trace
-    layout = go.Layout(
-        xaxis=dict(
-            title='Hour',
-            titlefont=dict(
-                size=18,
-                color='#7f7f7f'
-            )
-        ),
-        yaxis=dict(
-            title='soc',
-            titlefont=dict(
-                size=18,
-                color='#7f7f7f'
-            )
-        )
-    )
-
-    html_bat = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
-                               link_text='')
 
     if request.method == "POST":
         return redirect('add_system_component', sys_id)
 
+    else:
+        if system.system_output: # If model has been run, system_output will not be None
+            run_model_err = None
+            output_data = json.loads(system.system_output)
+            y = []
+            trace = []
+            for component in output_data['components']:
+                output = output_data['components'][component]['output']['demand']
+                if output:
+                    y.append(output)
+                    x = list(range(len(output)))
+                    trace.append(go.Scatter({'x': x, 'y': output, 'name': component}))
+
+            data = trace
+            layout = go.Layout(
+                xaxis=dict(
+                    title='Hour',
+                    titlefont=dict(
+                        size=18,
+                        color='#7f7f7f'
+                    )
+                ),
+                yaxis=dict(
+                    title='kW',
+                    titlefont=dict(
+                        size=18,
+                        color='#7f7f7f'
+                    )
+                )
+            )
+
+            html_demand = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
+                                              link_text='')
+
+            y = []
+            trace = []
+            for component in output_data['components']:
+                if output_data['components'][component]['comp_type'] == 'battery':
+                    output = output_data['components'][component]['output']['soc']
+                    if output:
+                        y.append(output)
+                        x = list(range(len(output)))
+                        trace.append(go.Scatter({'x': x, 'y': output, 'name': component}))
+
+            data = trace
+            layout = go.Layout(
+                xaxis=dict(
+                    title='Hour',
+                    titlefont=dict(
+                        size=18,
+                        color='#7f7f7f'
+                    )
+                ),
+                yaxis=dict(
+                    title='soc',
+                    titlefont=dict(
+                        size=18,
+                        color='#7f7f7f'
+                    )
+                )
+            )
+
+            html_bat = plotly.offline.plot({'data': data, 'layout': layout}, include_plotlyjs=False, output_type='div',
+                                           link_text='')
+
+        else: # If model hasn't run, return error directing user to run model
+            run_model_err = '*Model has not been simulated yet. Ensure system is complete and Run Model in order to view'
+            html_demand = None
+            html_bat = None
+
     args = {
+        'run_model_err': run_model_err,
         'html_demand': html_demand,
         'html_bat': html_bat,
         'sys_id': sys_id,
@@ -204,77 +211,81 @@ def add_component(request, sys_id):
     return render(request, 'optimizer/add_component.html', args)
 
 
-def view_system(request, sys_id):
+def run_model(request, sys_id):
     system = CreateSystem.objects.get(pk=sys_id)
     components = AddComponent.objects.filter(system_name=system)
     system_name = system.system_name
     component_values = components.values()
 
-    # Build Output Dictionary
-    system_output = {}
-    component_output = {}
-    for component in component_values:
-        comp_name = component.pop('comp_name')
-        component_output[comp_name] = component
 
-    system_output['components'] = component_output
-
-    # Create mapping for component inputs and controller configures
-    component_mapping = {
-        'demand': CreateDemand,
-        'solar': CreateSolar,
-        'battery': CreateBattery,
-        'generator': CreateGenerator,
-        'converter': CreateConverter,
-        'controller': CreateController,
-        'grid': CreateGrid
-    }
-
-    # Map component to CreateObject model, get all input info and add to system output dict
-    for component in components:
-        # Get all component inputs
-        component_inputs = component_mapping[component.comp_type].objects.filter(component=component).values()[0]
-        component_inputs.pop('component_id')
-        # Pop data from demand and solar
-        if component.comp_type == 'demand' or component.comp_type == 'solar':
-            component_inputs.pop('data')
-        # Convert demand filepath to absolute path
-        if component.comp_type == 'demand':
-            component_inputs['file'] = CreateDemand.objects.get(component=component).file.path
-        # Get all controller config info
-        controller_configs = AddToController.objects.filter(component=component).values()
-        if controller_configs: # If object is configured to controller, get configs
-            controller_configs = controller_configs[0]
-            controller_configs.pop('component_id') # Remove component id reference
-
-        else:
-            controller_configs = {}
-
-        # Add component inputs and controller configurations to system output
-        system_output['components'][component.comp_name]['input'] = component_inputs
-        system_output['components'][component.comp_name]['configure'] = controller_configs
-
-
-    api_input = json.dumps(system_output) # Dump dict to JSON
-
-    api_output = api_test.api_sim(api_input, api_test.test_file) # Run api
-
-    system.system_output = json.dumps(api_output) # Save API output to system as string
-    system.save()
 
     if request.method == 'POST':
         return redirect('add_system_component', sys_id)
 
-    dem_file = CreateDemand.objects.get(component=AddComponent.objects.get(system_name=system, comp_name='dmn1')).file
+    else:
+        # Build Output Dictionary
+        system_output = {}
+        component_output = {}
+        for component in component_values:
+            comp_name = component.pop('comp_name')
+            component_output[comp_name] = component
 
-    args = {
-        'dem_file': dem_file,
-        'sys_id': sys_id,
-        'system_name': system_name,
-        'system_output': system_output,
-    }
+        system_output['components'] = component_output
 
-    return render(request, 'optimizer/view_system.html', args)
+        # Create mapping for component inputs and controller configures
+        component_mapping = {
+            'demand': CreateDemand,
+            'solar': CreateSolar,
+            'battery': CreateBattery,
+            'generator': CreateGenerator,
+            'converter': CreateConverter,
+            'controller': CreateController,
+            'grid': CreateGrid
+        }
+
+        # Map component to CreateObject model, get all input info and add to system output dict
+        for component in components:
+            # Get all component inputs
+            component_inputs = component_mapping[component.comp_type].objects.filter(component=component).values()[0]
+            component_inputs.pop('component_id')
+            # Pop data from demand and solar
+            if component.comp_type == 'demand' or component.comp_type == 'solar':
+                component_inputs.pop('data')
+            # Convert demand filepath to absolute path
+            if component.comp_type == 'demand':
+                component_inputs['file'] = CreateDemand.objects.get(component=component).file.path
+            # Get all controller config info
+            controller_configs = AddToController.objects.filter(component=component).values()
+            if controller_configs:  # If object is configured to controller, get configs
+                controller_configs = controller_configs[0]
+                controller_configs.pop('component_id')  # Remove component id reference
+
+            else:
+                controller_configs = {}
+
+            # Add component inputs and controller configurations to system output
+            system_output['components'][component.comp_name]['input'] = component_inputs
+            system_output['components'][component.comp_name]['configure'] = controller_configs
+
+        api_input = json.dumps(system_output)  # Dump dict to JSON
+
+        api_output = api_test.api_sim(api_input, api_test.test_file)  # Run api
+
+        system.system_output = json.dumps(api_output)  # Save API output to system as string
+        system.save()
+
+        return redirect(view_system, sys_id)
+
+    # dem_file = CreateDemand.objects.get(component=AddComponent.objects.get(system_name=system, comp_name='dmn1')).file
+
+    # args = {
+    #     'dem_file': dem_file,
+    #     'sys_id': sys_id,
+    #     'system_name': system_name,
+    #     'system_output': system_output,
+    # }
+    #
+    # return render(request, 'optimizer/view_system.html', args)
 
 
 def create_system(request):
