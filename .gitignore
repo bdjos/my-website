@@ -5,7 +5,6 @@ media
 myvenv
 myprojectenv
 db.sqlite3
-/static
 .DS_Store
 mywebsite/settings.py
 solar-optimizer
